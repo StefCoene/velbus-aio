@@ -53,6 +53,7 @@ class Channel(BaseItem):
         super().__init__(module, name, writer)
         self._num = num
         self._subDevice = subDevice
+        self._name_editable = nameEditable
         if not nameEditable:
             self._is_loaded = True
         else:
@@ -87,6 +88,10 @@ class Channel(BaseItem):
     def is_loaded(self) -> bool:
         """Is this channel loaded."""
         return self._is_loaded
+
+    def is_name_editable(self) -> bool:
+        """Return if this channel's name can be edited by the user."""
+        return self._name_editable
 
     def is_counter_channel(self) -> bool:
         """Return if this channel is a counter channel."""
