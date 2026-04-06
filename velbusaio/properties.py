@@ -47,6 +47,10 @@ class Property(BaseItem):
         """
         return type(self).__name__
 
+    def is_name_editable(self) -> bool:
+        """Return False: the name of a property is fixed and cannot be edited by the user."""
+        return False
+
 
 class PSUPower(Property):
     """PSU Power property."""
