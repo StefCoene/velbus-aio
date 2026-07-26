@@ -24,6 +24,28 @@ class TestChannel:
         assert channel.is_loaded()
         assert not channel.is_sub_device()
 
+    def test_is_name_editable(self, mock_module, mock_writer):
+        """The nameEditable flag from the module spec is exposed as-is."""
+        editable = Channel(mock_module, 1, "Test", True, True, mock_writer, 0x01)
+        fixed = Channel(mock_module, 1, "Test", False, False, mock_writer, 0x01)
+        assert editable.is_name_editable()
+        assert not fixed.is_name_editable()
+
+    def test_name_editable_is_independent_of_loaded(self, mock_module, mock_writer):
+        """Editability is not the same question as loaded-ness.
+
+        The two share a source today -- a channel whose name cannot be edited
+        starts out loaded -- but they answer different questions, so a later
+        set_loaded() must not change the editability.
+        """
+        channel = Channel(mock_module, 1, "Test", True, True, mock_writer, 0x01)
+        assert channel.is_name_editable()
+        assert not channel.is_loaded()
+
+        channel.set_loaded(True)
+        assert channel.is_name_editable()
+        assert channel.is_loaded()
+
     def test_get_module_type(self, mock_module, mock_writer):
         """Test getting module type."""
         channel = Channel(mock_module, 1, "Test", False, False, mock_writer, 0x01)

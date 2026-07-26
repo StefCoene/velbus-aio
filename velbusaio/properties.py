@@ -51,6 +51,15 @@ class Property(BaseItem):
         """Return a stable, type-unique key for use in unique_id generation."""
         return type(self).__name__
 
+    def is_name_editable(self) -> bool:
+        """Return False: a property name is fixed and cannot be edited by the user.
+
+        Channels carry this flag from the module spec; properties are derived
+        rather than named on the module, so the answer is always the same. Both
+        expose it so a consumer can ask any item without special-casing.
+        """
+        return False
+
 
 class PSUPower(Property):
     """PSU Power property."""
