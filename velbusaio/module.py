@@ -108,6 +108,7 @@ from velbusaio.messages.slow_blinking_led import SlowBlinkingLedMessage
 from velbusaio.messages.temp_sensor_status import TempSensorStatusMessage
 from velbusaio.messages.update_led_status import UpdateLedStatusMessage
 from velbusaio.properties import Property
+from velbusaio.repeatlog import RepeatCollapser
 
 
 class Module:
@@ -208,6 +209,9 @@ class Module:
         """Initialize the module."""
         self._controller = controller
         self._log = logging.getLogger("velbus-module")
+        # Per-module, so a storm from one address cannot hide the traffic of
+        # every other module behind a shared counter.
+        self._rx_log = RepeatCollapser(self._log)
 
         # Build message handler dispatch table
         self._message_handlers = self._build_message_handlers()
@@ -913,7 +917,7 @@ class Module:
 
     async def on_message(self, message: Message) -> None:
         """Process received message."""
-        self._log.debug(f"RX: {message}")
+        self._rx_log.log(f"RX: {message}")
         _channel_offset = self.calc_channel_offset(message.address)
 
         # Use dispatch table for message handling

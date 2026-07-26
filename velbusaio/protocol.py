@@ -14,6 +14,7 @@ import backoff
 from velbusaio.const import MAXIMUM_MESSAGE_SIZE, MINIMUM_MESSAGE_SIZE, SLEEP_TIME
 from velbusaio.message import ParserError
 from velbusaio.raw_message import RawMessage, create as create_message_info
+from velbusaio.repeatlog import RepeatCollapser
 
 
 class VelbusProtocol(asyncio.BufferedProtocol):
@@ -44,6 +45,11 @@ class VelbusProtocol(asyncio.BufferedProtocol):
 
         self._serial_buf = b""
         self.transport: asyncio.Transport | None = None
+
+        # A stuck module or a duplicating gateway can repeat one frame hundreds
+        # of times per second; collapse those runs so they cannot crowd the rest
+        # of the traffic out of the log.
+        self._rx_log = RepeatCollapser(self._log)
 
         # everything for writing to Velbus
         self._send_queue: asyncio.Queue = asyncio.Queue()
@@ -100,6 +106,8 @@ class VelbusProtocol(asyncio.BufferedProtocol):
         """Called when the Velbus connection is lost."""
         self.transport = None
         self.pause_writing()
+        # Do not let a collapsed run die unreported with the connection.
+        self._rx_log.flush()
 
         if self._closing:
             return  # Connection loss was expected, nothing to do here...
@@ -128,10 +136,14 @@ class VelbusProtocol(asyncio.BufferedProtocol):
         """
         self._last_activity_time = time.time()
         self._serial_buf += data
-        self._log.debug(
+        # Log the bytes that just arrived. This used to hexlify the *front* of
+        # the accumulated buffer, which showed leftover bytes from a previous
+        # partial frame instead of the new ones whenever the buffer was not
+        # empty -- misleading exactly when the framing is what you are debugging.
+        self._rx_log.log(
             "RX: {nbytes} bytes: {data_hex}".format(
                 nbytes=len(data),
-                data_hex=binascii.hexlify(self._serial_buf[: len(data)], " "),
+                data_hex=binascii.hexlify(data, " "),
             )
         )
         _recheck = True
