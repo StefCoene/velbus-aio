@@ -30,5 +30,8 @@
     "F9": "VeryFastBlinkingLedMessage",
     "FF": "ModuleTypeMessage"
   },
+  "Memory": {
+    "ModuleName": "17AC-17EB"
+  },
   "Type": "VMBDALI"
 }
