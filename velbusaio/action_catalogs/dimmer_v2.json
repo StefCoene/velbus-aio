@@ -1,0 +1,401 @@
+{
+  "id": "dimmer_v2",
+  "description": "V2 (-20) Velbus dimmer action numbers (shared 6-byte, channel in param3 low bits)",
+  "actions": {
+    "00": {
+      "key": "no_action",
+      "label": "No action",
+      "times": 0
+    },
+    "01": {
+      "key": "forced_off_at_switch",
+      "label": "Forced Off (lock) at closed/open switch",
+      "times": 0
+    },
+    "02": {
+      "key": "forced_off",
+      "label": "Forced Off (lock)",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "03": {
+      "key": "toggle_forced_off",
+      "label": "Toggle Forced Off (lock/unlock)",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "04": {
+      "key": "cancel_forced_off",
+      "label": "Cancel Forced Off (unlock)",
+      "times": 0
+    },
+    "05": {
+      "key": "forced_on_at_switch",
+      "label": "Forced On at closed/open switch",
+      "times": 0
+    },
+    "06": {
+      "key": "forced_on",
+      "label": "Forced On",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "07": {
+      "key": "toggle_forced_on",
+      "label": "Toggle Forced On",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "08": {
+      "key": "cancel_forced_on",
+      "label": "Cancel Forced On",
+      "times": 0
+    },
+    "09": {
+      "key": "inhibit_at_switch",
+      "label": "Inhibit at closed/open switch",
+      "times": 0
+    },
+    "0A": {
+      "key": "inhibit",
+      "label": "Inhibit",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "0B": {
+      "key": "toggle_inhibit",
+      "label": "Toggle Inhibit",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "0C": {
+      "key": "cancel_inhibit",
+      "label": "Cancel Inhibit",
+      "times": 0
+    },
+    "0D": {
+      "key": "disable_program_at_switch",
+      "label": "Disable channel program at closed/open switch",
+      "times": 0
+    },
+    "0E": {
+      "key": "disable_program",
+      "label": "Disable channel program",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "0F": {
+      "key": "toggle_program",
+      "label": "Disable/enable channel program",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "10": {
+      "key": "enable_program",
+      "label": "Enable channel program",
+      "times": 0
+    },
+    "11": {
+      "key": "select_no_programs",
+      "label": "Select no programs",
+      "times": 0
+    },
+    "12": {
+      "key": "select_program_1",
+      "label": "Select program group 1",
+      "times": 0
+    },
+    "13": {
+      "key": "toggle_program_1",
+      "label": "Toggle program group 1",
+      "times": 0
+    },
+    "14": {
+      "key": "select_program_2",
+      "label": "Select program group 2",
+      "times": 0
+    },
+    "15": {
+      "key": "toggle_program_2",
+      "label": "Toggle program group 2",
+      "times": 0
+    },
+    "16": {
+      "key": "select_program_3",
+      "label": "Select program group 3",
+      "times": 0
+    },
+    "17": {
+      "key": "toggle_program_3",
+      "label": "Toggle program group 3",
+      "times": 0
+    },
+    "2C": {
+      "key": "off",
+      "label": "Off",
+      "times": 0
+    },
+    "2D": {
+      "key": "on",
+      "label": "On",
+      "times": 0
+    },
+    "2E": {
+      "key": "toggle",
+      "label": "Toggle",
+      "times": 0
+    },
+    "2F": {
+      "key": "delayed_on_at_switch",
+      "label": "Delayed-on at closed/open switch",
+      "times": 2,
+      "time_labels": ["Delay-on time", "Target"]
+    },
+    "30": {
+      "key": "restartable_delayed_on",
+      "label": "Restartable delayed-on",
+      "times": 2,
+      "time_labels": ["Delay-on time", "Target"]
+    },
+    "31": {
+      "key": "non_restartable_delayed_on",
+      "label": "Non-restartable delayed-on",
+      "times": 2,
+      "time_labels": ["Delay-on time", "Target"]
+    },
+    "32": {
+      "key": "start_stop_delayed_on",
+      "label": "Start-stop delayed-on",
+      "times": 2,
+      "time_labels": ["Delay-on time", "Target"]
+    },
+    "33": {
+      "key": "restartable_delayed_off",
+      "label": "Restartable delayed-off",
+      "times": 1,
+      "time_labels": ["Delay-off time"]
+    },
+    "34": {
+      "key": "non_restartable_delayed_off",
+      "label": "Non-restartable delayed-off",
+      "times": 1,
+      "time_labels": ["Delay-off time"]
+    },
+    "35": {
+      "key": "start_stop_delayed_off",
+      "label": "Start-stop delayed-off",
+      "times": 1,
+      "time_labels": ["Delay-off time"]
+    },
+    "36": {
+      "key": "restartable_timer",
+      "label": "Restartable timer",
+      "times": 2,
+      "time_labels": ["Timeout", "Target"]
+    },
+    "37": {
+      "key": "non_restartable_timer",
+      "label": "Non-restartable timer",
+      "times": 2,
+      "time_labels": ["Timeout", "Target"]
+    },
+    "38": {
+      "key": "start_stop_timer",
+      "label": "Start-stop timer",
+      "times": 2,
+      "time_labels": ["Timeout", "Target"]
+    },
+    "39": {
+      "key": "dim_up",
+      "label": "Dim up",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "3A": {
+      "key": "dim_up_on_short",
+      "label": "Dim up/on at short press",
+      "times": 2,
+      "time_labels": ["Timeout", "Target"]
+    },
+    "3B": {
+      "key": "dim_down",
+      "label": "Dim down",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "3C": {
+      "key": "dim_down_off_short",
+      "label": "Dim down/off at short press",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "3D": {
+      "key": "dim_up_down",
+      "label": "Dim up-down",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "3E": {
+      "key": "dim_up_down_toggle_short",
+      "label": "Dim up-down/toggle at short press",
+      "times": 2,
+      "time_labels": ["Timeout", "Target"]
+    },
+    "3F": {
+      "key": "go_to_scene_0",
+      "label": "Go to scene 0",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "40": {
+      "key": "go_to_scene_1",
+      "label": "Go to scene 1",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "41": {
+      "key": "go_to_scene_2",
+      "label": "Go to scene 2",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "42": {
+      "key": "go_to_scene_3",
+      "label": "Go to scene 3",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "43": {
+      "key": "go_to_scene_4",
+      "label": "Go to scene 4",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "44": {
+      "key": "go_to_scene_5",
+      "label": "Go to scene 5",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "45": {
+      "key": "go_to_scene_6",
+      "label": "Go to scene 6",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "46": {
+      "key": "go_to_scene_7",
+      "label": "Go to scene 7",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "47": {
+      "key": "go_to_scene_8",
+      "label": "Go to scene 8",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "48": {
+      "key": "go_to_scene_9",
+      "label": "Go to scene 9",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "49": {
+      "key": "go_to_scene_10",
+      "label": "Go to scene 10",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "4A": {
+      "key": "go_to_scene_11",
+      "label": "Go to scene 11",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "4B": {
+      "key": "go_to_scene_12",
+      "label": "Go to scene 12",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "4C": {
+      "key": "go_to_scene_13",
+      "label": "Go to scene 13",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "4D": {
+      "key": "go_to_scene_14",
+      "label": "Go to scene 14",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "4E": {
+      "key": "go_to_scene_15",
+      "label": "Go to scene 15",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "4F": {
+      "key": "toggle_scene_0",
+      "label": "Toggle scene 0",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "50": {
+      "key": "toggle_scene_1",
+      "label": "Toggle scene 1",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "51": {
+      "key": "toggle_scene_2",
+      "label": "Toggle scene 2",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "52": {
+      "key": "toggle_scene_3",
+      "label": "Toggle scene 3",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "53": {
+      "key": "toggle_scene_4",
+      "label": "Toggle scene 4",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "54": {
+      "key": "toggle_scene_5",
+      "label": "Toggle scene 5",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "55": {
+      "key": "toggle_scene_6",
+      "label": "Toggle scene 6",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "56": {
+      "key": "toggle_scene_7",
+      "label": "Toggle scene 7",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "57": {
+      "key": "toggle_scene_8",
+      "label": "Toggle scene 8",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "58": {
+      "key": "toggle_scene_9",
+      "label": "Toggle scene 9",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    }
+  }
+}

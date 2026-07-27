@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any
 
 from velbusaio.baseItem import BaseItem
 from velbusaio.command_registry import commandRegistry
+from velbusaio.config import ConfigParameter
 from velbusaio.const import (
     DEVICE_CLASS_TEMPERATURE,
     ENERGY_KILO_WATT_HOUR,
@@ -20,6 +21,7 @@ from velbusaio.const import (
     VOLUME_CUBIC_METER_HOUR,
     VOLUME_LITERS_HOUR,
 )
+from velbusaio.exceptions import VelbusConfigError
 from velbusaio.message import Message
 from velbusaio.messages.edge_set_color import (
     CustomColorPriority,
@@ -34,6 +36,7 @@ from velbusaio.messages.sensor_temp_request import (
 )
 
 if TYPE_CHECKING:
+    from velbusaio.actions import ActionSlot
     from velbusaio.module import Module
 
 
@@ -248,6 +251,74 @@ class Channel(BaseItem):
         """Return the accumulated energy in kWh, or None if not applicable."""
         return None
 
+    def get_action_table(self):
+        """Return this channel's action table, if available."""
+        return self._module.get_action_table(self._num)
+
+    async def get_actions(
+        self, *, refresh: bool = False, include_empty: bool = False
+    ) -> list[ActionSlot]:
+        """Return programmed input→output action slots for this channel."""
+        table = self.get_action_table()
+        if table is None:
+            return []
+        return await table.get_actions(refresh=refresh, include_empty=include_empty)
+
+    async def set_action(
+        self,
+        *,
+        source_address: int,
+        action: str | int,
+        source_channel: int | None = None,
+        source_bit: int | None = None,
+        time1: int = 0xFF,
+        time2: int = 0xFF,
+        time3: int = 0xFF,
+        time4: int = 0xFF,
+        on_release: bool = False,
+        slot: int | None = None,
+    ) -> ActionSlot:
+        """Program an input→output action on this channel."""
+        table = self.get_action_table()
+        if table is None:
+            raise RuntimeError(f"Channel {self._num} has no action table")
+        return await table.set_action(
+            source_address=source_address,
+            action=action,
+            source_channel=source_channel,
+            source_bit=source_bit,
+            time1=time1,
+            time2=time2,
+            time3=time3,
+            time4=time4,
+            on_release=on_release,
+            slot=slot,
+        )
+
+    async def clear_action(self, slot: int) -> ActionSlot:
+        """Clear one action slot on this channel."""
+        table = self.get_action_table()
+        if table is None:
+            raise RuntimeError(f"Channel {self._num} has no action table")
+        return await table.clear_action(slot)
+
+    async def clear_actions_for_source(
+        self,
+        source_address: int,
+        *,
+        source_channel: int | None = None,
+        source_bit: int | None = None,
+    ) -> list[ActionSlot]:
+        """Clear action slots matching a source input."""
+        table = self.get_action_table()
+        if table is None:
+            return []
+        return await table.clear_actions_for_source(
+            source_address,
+            source_channel=source_channel,
+            source_bit=source_bit,
+        )
+
 
 class Blind(Channel):
     """A blind channel."""
@@ -341,12 +412,98 @@ class Button(Channel):
     _closed = False
     _led_state = None
     _long = False
+    _saved_reaction_time: int | None = None
 
     def get_categories(self) -> list[str]:
         """Return the categories for this channel."""
         if self._enabled:
             return ["binary_sensor", "led", "button"]
         return []
+
+    def is_enabled(self) -> bool:
+        """Return whether this channel is currently enabled."""
+        return self._enabled
+
+    def supports_channel_enable(self) -> bool:
+        """Return True when EEPROM enable/disable is available."""
+        return self._module.get_channel_enable_spec(self._num) is not None
+
+    async def get_channel_enabled(self, *, refresh: bool = False) -> bool | None:
+        """Return EEPROM enable state (reaction time != disabled)."""
+        spec = self._module.get_channel_enable_spec(self._num)
+        if spec is None:
+            return None
+        memory = self._module.get_memory()
+        if memory is None:
+            return self._enabled
+        value = await memory.read_byte(spec["address"], use_cache=not refresh)
+        enabled = value != spec["disabled_value"]
+        if enabled:
+            self._saved_reaction_time = value
+        self._enabled = enabled
+        return enabled
+
+    async def set_channel_enabled(self, enabled: bool) -> None:
+        """Enable or disable this channel via the reaction-time EEPROM byte."""
+        spec = self._module.get_channel_enable_spec(self._num)
+        if spec is None:
+            raise VelbusConfigError(
+                f"Channel {self._num} does not support enable/disable"
+            )
+        memory = self._module.get_memory()
+        if memory is None:
+            raise RuntimeError("Module memory backend is not initialized")
+        current = await memory.read_byte(spec["address"])
+        if current != spec["disabled_value"]:
+            self._saved_reaction_time = current
+        if enabled:
+            value = (
+                self._saved_reaction_time
+                if self._saved_reaction_time not in (None, spec["disabled_value"])
+                else spec["enabled_value"]
+            )
+        else:
+            value = spec["disabled_value"]
+        await memory.write_byte(spec["address"], value & 0xFF)
+        await self.update({"enabled": enabled})
+
+    async def set_name_persistent(self, name: str) -> None:
+        """Write this channel's name to module EEPROM."""
+        await self._module.set_channel_name_persistent(self._num, name)
+
+    def get_config_parameters(self) -> list[ConfigParameter]:
+        """Return discoverable CONFIG parameters for this button channel."""
+        params: list[ConfigParameter] = [
+            ConfigParameter(
+                key="name",
+                label="Channel name",
+                kind="text",
+                getter=self._get_name_value,
+                setter=self.set_name_persistent,
+                max_length=16,
+                channel=self._num,
+                entity=False,
+            ),
+        ]
+        if self.supports_channel_enable():
+            params.append(
+                ConfigParameter(
+                    key="enabled",
+                    label="Enabled",
+                    kind="bool",
+                    getter=self._get_enabled_value,
+                    setter=self.set_channel_enabled,
+                    channel=self._num,
+                )
+            )
+        return params
+
+    async def _get_name_value(self) -> str:
+        return self.get_name()
+
+    async def _get_enabled_value(self) -> bool:
+        enabled = await self.get_channel_enabled()
+        return True if enabled is None else enabled
 
     def is_closed(self) -> bool:
         """Return if this button is on."""
@@ -695,6 +852,47 @@ class Temperature(Channel):
         msg = cls(self._address, interval)
         await self._writer(msg)
 
+    def get_temp_settings(self):
+        """Return the module temperature settings helper, if available."""
+        if self._module is None:
+            return None
+        return self._module.get_temp_settings()
+
+    async def refresh_temp_settings(self, *, force: bool = True) -> dict[str, Any]:
+        """Request and cache temperature settings from the module."""
+        settings = self.get_temp_settings()
+        if settings is None:
+            raise RuntimeError(
+                f"Channel {self._num} does not support temperature settings"
+            )
+        return await settings.refresh(force=force)
+
+    async def get_temp_setting(self, key: str) -> Any:
+        """Return one temperature setting value (loading from the bus if needed)."""
+        settings = self.get_temp_settings()
+        if settings is None:
+            raise RuntimeError(
+                f"Channel {self._num} does not support temperature settings"
+            )
+        await settings.ensure_loaded()
+        return settings.get(key)
+
+    async def set_temp_setting(self, key: str, value: Any) -> None:
+        """Write one temperature setting via TempSensorSettings Part1-4."""
+        settings = self.get_temp_settings()
+        if settings is None:
+            raise RuntimeError(
+                f"Channel {self._num} does not support temperature settings"
+            )
+        await settings.set_value(key, value)
+
+    def get_config_parameters(self) -> list[ConfigParameter]:
+        """Return discoverable CONFIG parameters for temperature presets."""
+        settings = self.get_temp_settings()
+        if settings is None:
+            return []
+        return settings.get_config_parameters()
+
     async def _switch_mode(self) -> None:
         """Switch the climate mode."""
         if self._cmode == "safe":
@@ -836,6 +1034,18 @@ class Relay(Channel):
         """Return if this relay is disabled."""
         return self._disabled
 
+    def supports_inhibit(self) -> bool:
+        """Return True when inhibit / cancel-inhibit commands are available."""
+        return commandRegistry.has_command(0x16, self._module.get_type())
+
+    def supports_forced_on(self) -> bool:
+        """Return True when forced-on / cancel-forced-on commands are available."""
+        return commandRegistry.has_command(0x14, self._module.get_type())
+
+    def supports_forced_off(self) -> bool:
+        """Return True when forced-off / cancel-forced-off commands are available."""
+        return commandRegistry.has_command(0x12, self._module.get_type())
+
     async def turn_on(self) -> None:
         """Send the turn on message."""
         cls = commandRegistry.get_command(0x02, self._module.get_type())
@@ -879,6 +1089,108 @@ class Relay(Channel):
         if state:
             msg.delay_time = 0xFFFFFF  # Permanent
         await self._writer(msg)
+
+    async def set_name_persistent(self, name: str) -> None:
+        """Write this channel's name to module EEPROM."""
+        await self._module.set_channel_name_persistent(self._num, name)
+
+    async def get_normal_closed(self, *, refresh: bool = False) -> bool | None:
+        """Return True when this relay is programmed as normally closed."""
+        table = self.get_action_table()
+        if table is None:
+            return None
+        return await table.get_normal_closed(refresh=refresh)
+
+    async def set_normal_closed(self, normal_closed: bool) -> None:
+        """Program NO/NC contact behaviour in EEPROM."""
+        table = self.get_action_table()
+        if table is None:
+            raise RuntimeError(f"Channel {self._num} has no action table")
+        await table.set_normal_closed(normal_closed)
+
+    def get_config_parameters(self) -> list[ConfigParameter]:
+        """Return discoverable CONFIG parameters for this relay channel."""
+        params: list[ConfigParameter] = [
+            ConfigParameter(
+                key="name",
+                label="Channel name",
+                kind="text",
+                getter=self._get_name_value,
+                setter=self.set_name_persistent,
+                max_length=16,
+                channel=self._num,
+                entity=False,
+            ),
+        ]
+        if self.supports_inhibit():
+            params.append(
+                ConfigParameter(
+                    key="inhibit",
+                    label="Inhibit",
+                    kind="bool",
+                    getter=self._get_inhibit_value,
+                    setter=self.set_inhibit,
+                    channel=self._num,
+                )
+            )
+        if self.supports_forced_on():
+            params.append(
+                ConfigParameter(
+                    key="forced_on",
+                    label="Forced on",
+                    kind="bool",
+                    getter=self._get_forced_on_value,
+                    setter=self.set_forced_on,
+                    channel=self._num,
+                )
+            )
+        if self.supports_forced_off():
+            params.append(
+                ConfigParameter(
+                    key="forced_off",
+                    label="Forced off",
+                    kind="bool",
+                    getter=self._get_forced_off_value,
+                    setter=self.set_forced_off,
+                    channel=self._num,
+                )
+            )
+        table = self.get_action_table()
+        if table is not None and table.noc_address is not None:
+            params.append(
+                ConfigParameter(
+                    key="contact",
+                    label="Contact",
+                    kind="select",
+                    getter=self._get_contact_value,
+                    setter=self._set_contact_value,
+                    options=["NO", "NC"],
+                    channel=self._num,
+                    entity=False,
+                )
+            )
+        return params
+
+    async def _get_name_value(self) -> str:
+        return self.get_name()
+
+    async def _get_inhibit_value(self) -> bool:
+        return self.is_inhibit()
+
+    async def _get_forced_on_value(self) -> bool:
+        return self.is_forced_on()
+
+    async def _get_forced_off_value(self) -> bool:
+        return self.is_forced_off()
+
+    async def _get_contact_value(self) -> str:
+        normal_closed = await self.get_normal_closed()
+        if normal_closed is None:
+            return "NO"
+        return "NC" if normal_closed else "NO"
+
+    async def _set_contact_value(self, value: str) -> None:
+        await self.set_normal_closed(str(value).upper() == "NC")
 
 
 class EdgeLit(Channel):

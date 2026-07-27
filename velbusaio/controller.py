@@ -26,6 +26,7 @@ from velbusaio.channels import (
     SensorNumber,
     Temperature,
 )
+from velbusaio.config import ConfigParameter
 from velbusaio.exceptions import VelbusConnectionFailed
 from velbusaio.handler import PacketHandler
 from velbusaio.helpers import get_cache_dir
@@ -403,6 +404,22 @@ class Velbus:
         """Get all climate devices."""
         return self._get_all("climate")
 
+    def get_all_temp_config(self) -> list[Temperature]:
+        """Get temperature channels that expose settings configuration."""
+        result: list[Temperature] = []
+        seen: set[tuple[int, int]] = set()
+        for channel in itertools.chain(self.get_all_climate(), self.get_all_sensor()):
+            if not isinstance(channel, Temperature):
+                continue
+            if channel.get_temp_settings() is None:
+                continue
+            key = (channel.get_module_address(), channel.get_channel_number())
+            if key in seen:
+                continue
+            seen.add(key)
+            result.append(channel)
+        return result
+
     def get_all_cover(self) -> list[Blind]:
         """Get all covers."""
         return self._get_all("cover")
@@ -418,6 +435,33 @@ class Velbus:
     def get_all_led(self) -> list[Button]:
         """Get all LED devices."""
         return self._get_all("led")
+
+    def get_all_relay_config(self) -> list[Relay]:
+        """Get relay channels that expose configuration parameters."""
+        return [
+            channel
+            for channel in self.get_all_switch()
+            if hasattr(channel, "get_config_parameters")
+        ]
+
+    def get_all_config_parameters(self) -> list[ConfigParameter]:
+        """Get CONFIG parameters that should be exposed as Home Assistant entities."""
+        params: list[ConfigParameter] = []
+        for channel in self.get_all_relay_config():
+            params.extend(
+                param for param in channel.get_config_parameters() if param.entity
+            )
+        seen: set[tuple[int, int | None, str]] = set()
+        for channel in self.get_all_temp_config():
+            for param in channel.get_config_parameters():
+                if not param.entity:
+                    continue
+                key = (channel.get_module_address(), param.channel, param.key)
+                if key in seen:
+                    continue
+                seen.add(key)
+                params.append(param)
+        return params
 
     def _get_all(self, class_name: str) -> list[t.Any]:
         """Get all channels."""

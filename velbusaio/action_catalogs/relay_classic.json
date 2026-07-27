@@ -1,0 +1,208 @@
+{
+  "id": "relay_classic",
+  "description": "Classic Velbus relay action codes (VMB4RYNO / VMB4RYLD family)",
+  "actions": {
+    "00": { "key": "momentary", "label": "Momentary", "times": 0 },
+    "01": { "key": "off", "label": "Off", "times": 0 },
+    "02": {
+      "key": "off_timers_disabled",
+      "label": "Off with timers disabled",
+      "times": 0
+    },
+    "03": {
+      "key": "off_timers_disabled_short",
+      "label": "Off with timers disabled at short press",
+      "times": 0
+    },
+    "04": {
+      "key": "off_timers_disabled_long",
+      "label": "Off with timers disabled at long press",
+      "times": 0
+    },
+    "05": { "key": "on", "label": "On", "times": 0 },
+    "06": {
+      "key": "on_timers_disabled",
+      "label": "On with timers disabled",
+      "times": 0
+    },
+    "07": {
+      "key": "on_timers_disabled_short",
+      "label": "On with timers disabled at short press",
+      "times": 0
+    },
+    "08": {
+      "key": "on_timers_disabled_long",
+      "label": "On with timers disabled at long press",
+      "times": 0
+    },
+    "09": { "key": "toggle", "label": "Toggle", "times": 0 },
+    "0A": {
+      "key": "toggle_timers_disabled",
+      "label": "Toggle with timers disabled",
+      "times": 0
+    },
+    "0B": {
+      "key": "toggle_timers_disabled_short",
+      "label": "Toggle with timers disabled at short press",
+      "times": 0
+    },
+    "0C": {
+      "key": "toggle_timers_disabled_long",
+      "label": "Toggle with timers disabled at long press",
+      "times": 0
+    },
+    "0D": {
+      "key": "start_stop_timer",
+      "label": "Start/stop timer",
+      "times": 2,
+      "time_labels": ["Time1 (short press)", "Time2 (long press)"]
+    },
+    "0E": {
+      "key": "restartable_timer",
+      "label": "Restartable timer",
+      "times": 2,
+      "time_labels": ["Time1 (short press)", "Time2 (long press)"]
+    },
+    "0F": {
+      "key": "non_retriggerable_timer",
+      "label": "Non-retriggerable timer",
+      "times": 1,
+      "time_labels": ["Time"]
+    },
+    "10": {
+      "key": "trigger_on_release_timer",
+      "label": "Trigger-on-release timer",
+      "times": 1,
+      "time_labels": ["Time"]
+    },
+    "11": {
+      "key": "on_press_delayed_off_release",
+      "label": "On at press, delayed Off at release",
+      "times": 1,
+      "time_labels": ["Delayed Off time"]
+    },
+    "12": {
+      "key": "delayed_off_when_on",
+      "label": "Delayed Off only when relay is on",
+      "times": 1,
+      "time_labels": ["Delayed Off time"]
+    },
+    "13": {
+      "key": "start_stop_delayed_on",
+      "label": "Start/stop delayed On",
+      "times": 2,
+      "time_labels": ["Delayed On time", "Timeout"]
+    },
+    "14": {
+      "key": "restartable_delayed_on",
+      "label": "Restartable delayed On",
+      "times": 2,
+      "time_labels": ["Delayed On time", "Timeout"]
+    },
+    "15": {
+      "key": "non_restartable_delayed_on",
+      "label": "Non-restartable delayed On",
+      "times": 2,
+      "time_labels": ["Delayed On time", "Timeout"]
+    },
+    "16": {
+      "key": "start_stop_interval",
+      "label": "Start/stop interval timer",
+      "times": 3,
+      "time_labels": ["Timeout", "Pulse time", "Pause time"]
+    },
+    "17": {
+      "key": "restartable_interval",
+      "label": "Restartable interval timer",
+      "times": 3,
+      "time_labels": ["Timeout", "Pulse time", "Pause time"]
+    },
+    "18": {
+      "key": "non_restartable_interval",
+      "label": "Non-restartable interval timer",
+      "times": 3,
+      "time_labels": ["Timeout", "Pulse time", "Pause time"]
+    },
+    "19": {
+      "key": "disable_at_closed",
+      "label": "Disable at closed switch",
+      "times": 0
+    },
+    "1A": {
+      "key": "disable_at_opened",
+      "label": "Disable at opened switch",
+      "times": 0
+    },
+    "1B": {
+      "key": "disable_at_press",
+      "label": "Disable at pressing push button",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "1C": {
+      "key": "toggle_disable_at_press",
+      "label": "Toggle disable at pressing push button",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "1D": {
+      "key": "cancel_disable_at_press",
+      "label": "Cancel disable at pressing push button",
+      "times": 0
+    },
+    "1E": {
+      "key": "forced_on_at_closed",
+      "label": "Forced On at closed switch",
+      "times": 0
+    },
+    "1F": {
+      "key": "forced_on_at_opened",
+      "label": "Forced On at opened switch",
+      "times": 0
+    },
+    "20": {
+      "key": "forced_on_at_press",
+      "label": "Forced On at pressing push button",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "21": {
+      "key": "toggle_forced_on_at_press",
+      "label": "Toggle forced On at pressing push button",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "22": {
+      "key": "cancel_forced_on_at_press",
+      "label": "Cancel Forced On at pressing push button",
+      "times": 0
+    },
+    "23": {
+      "key": "inhibit_at_closed",
+      "label": "Inhibit at closed switch",
+      "times": 0
+    },
+    "24": {
+      "key": "inhibit_at_opened",
+      "label": "Inhibit at opened switch",
+      "times": 0
+    },
+    "25": {
+      "key": "inhibit_at_press",
+      "label": "Inhibit at pressing push button",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "26": {
+      "key": "toggle_inhibit_at_press",
+      "label": "Toggle inhibit at pressing push button",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "27": {
+      "key": "cancel_inhibit_at_press",
+      "label": "Cancel inhibit at pressing push button",
+      "times": 0
+    }
+  }
+}

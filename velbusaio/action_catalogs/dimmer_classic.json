@@ -1,0 +1,257 @@
+{
+  "id": "dimmer_classic",
+  "description": "Classic Velbus dimmer action codes (VMB4DC / VMBDMI family)",
+  "actions": {
+    "00": { "key": "momentary", "label": "Momentary", "times": 0 },
+    "01": { "key": "off", "label": "Off", "times": 0 },
+    "02": {
+      "key": "off_timers_disabled",
+      "label": "Off with timers disabled",
+      "times": 0
+    },
+    "03": {
+      "key": "off_timers_disabled_short",
+      "label": "Off with timers disabled at short press",
+      "times": 0
+    },
+    "04": {
+      "key": "off_timers_disabled_long",
+      "label": "Off with timers disabled at long press",
+      "times": 0
+    },
+    "05": {
+      "key": "slow_off",
+      "label": "Slow off",
+      "times": 1,
+      "time_labels": ["Dim down time"]
+    },
+    "06": { "key": "on", "label": "On", "times": 0 },
+    "07": {
+      "key": "on_timers_disabled",
+      "label": "On with timers disabled",
+      "times": 0
+    },
+    "08": {
+      "key": "on_timers_disabled_short",
+      "label": "On with timers disabled at short press",
+      "times": 0
+    },
+    "09": {
+      "key": "on_timers_disabled_long",
+      "label": "On with timers disabled at long press",
+      "times": 0
+    },
+    "0A": {
+      "key": "slow_on",
+      "label": "Slow on",
+      "times": 1,
+      "time_labels": ["Dim up time"]
+    },
+    "0B": { "key": "toggle", "label": "Toggle", "times": 0 },
+    "0C": {
+      "key": "toggle_timers_disabled",
+      "label": "Toggle with timers disabled",
+      "times": 0
+    },
+    "0D": {
+      "key": "toggle_timers_disabled_short",
+      "label": "Toggle with timers disabled at short press",
+      "times": 0
+    },
+    "0E": {
+      "key": "toggle_timers_disabled_long",
+      "label": "Toggle with timers disabled at long press",
+      "times": 0
+    },
+    "0F": {
+      "key": "slow_on_off",
+      "label": "Slow on/off",
+      "times": 2,
+      "time_labels": ["Dim up time", "Dim down time"]
+    },
+    "10": {
+      "key": "start_stop_timer",
+      "label": "Start/stop timer",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "11": {
+      "key": "start_stop_timer_slow",
+      "label": "Start/stop timer with slow on/off",
+      "times": 3,
+      "time_labels": ["Timeout", "Dim up time", "Dim down time"]
+    },
+    "12": {
+      "key": "restartable_timer",
+      "label": "Restartable timer",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "13": {
+      "key": "restartable_timer_slow",
+      "label": "Restartable timer with slow on/off",
+      "times": 3,
+      "time_labels": ["Timeout", "Dim up time", "Dim down time"]
+    },
+    "14": {
+      "key": "non_retriggerable_timer",
+      "label": "Non-restartable timer",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "15": {
+      "key": "non_retriggerable_timer_slow",
+      "label": "Non-restartable timer with slow on/off",
+      "times": 3,
+      "time_labels": ["Timeout", "Dim up time", "Dim down time"]
+    },
+    "16": {
+      "key": "slow_on_press_slow_off_release",
+      "label": "Slow on at press, slow off at release + timeout",
+      "times": 3,
+      "time_labels": ["Timeout", "Dim up time", "Dim down time"]
+    },
+    "17": {
+      "key": "dim_up",
+      "label": "Dim up",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "18": {
+      "key": "dim_up_long_on_short",
+      "label": "Dim up at long press, on at short press",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "19": {
+      "key": "dim_up_long_memory_short",
+      "label": "Dim up at long press, memory at short press",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "1A": {
+      "key": "dim_down",
+      "label": "Dim down",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "1B": {
+      "key": "dim_down_long_off_short",
+      "label": "Dim down at long press, off at short press",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "1C": {
+      "key": "dim",
+      "label": "Dim",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "1D": {
+      "key": "dim_long_on_off_short",
+      "label": "Dim at long press, on or off at short press",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "1E": {
+      "key": "dim_long_memory_off_short",
+      "label": "Dim at long press, memory or off at short press",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "1F": {
+      "key": "atmospheric_dimvalue",
+      "label": "Atmospheric dimvalue",
+      "times": 3,
+      "time_labels": ["Timeout", "Dim time", "Dim value"]
+    },
+    "20": { "key": "slider_dimmer", "label": "Slider dimmer", "times": 0 },
+    "21": {
+      "key": "multi_step_dimmer",
+      "label": "Multi step dimmer",
+      "times": 2,
+      "time_labels": ["Timeout", "Dim time"]
+    },
+    "22": {
+      "key": "disable_at_closed",
+      "label": "Disable at closed switch",
+      "times": 0
+    },
+    "23": {
+      "key": "disable_at_opened",
+      "label": "Disable at opened switch",
+      "times": 0
+    },
+    "24": {
+      "key": "disable_at_press",
+      "label": "Disable at pressing push button",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "25": {
+      "key": "toggle_disable_at_press",
+      "label": "Toggle disable at pressing push button",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "26": {
+      "key": "cancel_disable_at_press",
+      "label": "Cancel disable at pressing push button",
+      "times": 0
+    },
+    "27": {
+      "key": "forced_on_at_closed",
+      "label": "Forced On at closed switch",
+      "times": 0
+    },
+    "28": {
+      "key": "forced_on_at_opened",
+      "label": "Forced On at opened switch",
+      "times": 0
+    },
+    "29": {
+      "key": "forced_on_at_press",
+      "label": "Forced On at pressing push button",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "2A": {
+      "key": "toggle_forced_on_at_press",
+      "label": "Toggle forced On at pressing push button",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "2B": {
+      "key": "cancel_forced_on_at_press",
+      "label": "Cancel Forced On at pressing push button",
+      "times": 0
+    },
+    "2C": {
+      "key": "inhibit_at_closed",
+      "label": "Inhibit at closed switch",
+      "times": 0
+    },
+    "2D": {
+      "key": "inhibit_at_opened",
+      "label": "Inhibit at opened switch",
+      "times": 0
+    },
+    "2E": {
+      "key": "inhibit_at_press",
+      "label": "Inhibit at pressing push button",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "2F": {
+      "key": "toggle_inhibit_at_press",
+      "label": "Toggle inhibit at pressing push button",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "30": {
+      "key": "cancel_inhibit_at_press",
+      "label": "Cancel inhibit at pressing push button",
+      "times": 0
+    }
+  }
+}

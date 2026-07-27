@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from velbusaio.controller import Velbus as Controller
 
 from velbusaio import channels as channels_module, properties as properties_module
+from velbusaio.actions import ActionSlot, ActionTable, build_action_tables
 from velbusaio.channels import (
     Button,
     ButtonCounter,
@@ -27,8 +28,10 @@ from velbusaio.channels import (
     Temperature as TemperatureChannelType,
 )
 from velbusaio.command_registry import commandRegistry
+from velbusaio.config import decode_name, encode_name
 from velbusaio.const import PRIORITY_LOW, SCAN_MODULEINFO_TIMEOUT_INITIAL
 from velbusaio.helpers import h2, handle_match, keys_exists
+from velbusaio.memory import MemoryBackend, join_address
 from velbusaio.message import Message
 from velbusaio.messages.blind_status import (
     BlindStatusMessage,
@@ -105,9 +108,14 @@ from velbusaio.messages.sensor_temperature import SensorTemperatureMessage
 from velbusaio.messages.set_led import SetLedMessage
 from velbusaio.messages.slider_status import SliderStatusMessage
 from velbusaio.messages.slow_blinking_led import SlowBlinkingLedMessage
+from velbusaio.messages.temp_sensor_settings_part1 import TempSensorSettingsPart1
+from velbusaio.messages.temp_sensor_settings_part2 import TempSensorSettingsPart2
+from velbusaio.messages.temp_sensor_settings_part3 import TempSensorSettingsPart3
+from velbusaio.messages.temp_sensor_settings_part4 import TempSensorSettingsPart4
 from velbusaio.messages.temp_sensor_status import TempSensorStatusMessage
 from velbusaio.messages.update_led_status import UpdateLedStatusMessage
 from velbusaio.properties import Property
+from velbusaio.temp_settings import TemperatureSettings, build_temperature_settings
 
 
 class Module:
@@ -181,6 +189,9 @@ class Module:
         self._got_status.clear()
         self._channels: dict[int, Channel] = {}
         self._properties: dict[str, Property] = {}
+        self._memory: MemoryBackend | None = None
+        self._action_tables: dict[int, ActionTable] = {}
+        self._temp_settings: TemperatureSettings | None = None
         self.loaded = False
         self._use_cache = True
         self._loaded_cache = {}
@@ -257,6 +268,22 @@ class Module:
 
         # set some params from the velbus controller
         self._writer = writer
+        self._memory = MemoryBackend(self._address, writer, self._log)
+        self._action_tables = build_action_tables(
+            self._memory,
+            self._data.get("Memory", {}).get("ActionTable", {}),
+            self._log,
+        )
+        temp_chan: int | None = None
+        if "TemperatureChannel" in self._data:
+            temp_chan = self._translate_channel_name(self._data["TemperatureChannel"])
+        self._temp_settings = build_temperature_settings(
+            self._address,
+            writer,
+            self._data,
+            channel=temp_chan,
+            logger=self._log,
+        )
         for chan in self._channels.values():
             chan.set_writer(writer)
 
@@ -476,6 +503,10 @@ class Module:
             # Temperature messages
             SensorTemperatureMessage: self._handle_sensor_temperature,
             TempSensorStatusMessage: self._handle_temp_sensor_status,
+            TempSensorSettingsPart1: self._handle_temp_sensor_settings,
+            TempSensorSettingsPart2: self._handle_temp_sensor_settings,
+            TempSensorSettingsPart3: self._handle_temp_sensor_settings,
+            TempSensorSettingsPart4: self._handle_temp_sensor_settings,
             # Button and module status messages
             PushButtonStatusMessage: self._handle_push_button_status,
             ModuleStatusMessage: self._handle_module_status,
@@ -612,6 +643,19 @@ class Module:
                 "max": message.getMaxTemp(),
             },
         )
+
+    async def _handle_temp_sensor_settings(
+        self,
+        message: (
+            TempSensorSettingsPart1
+            | TempSensorSettingsPart2
+            | TempSensorSettingsPart3
+            | TempSensorSettingsPart4
+        ),
+    ) -> None:
+        """Handle temperature sensor settings Part1-4 replies."""
+        if self._temp_settings is not None:
+            self._temp_settings.feed_message(message)
 
     async def _handle_temp_sensor_status(
         self, message: TempSensorStatusMessage
@@ -953,6 +997,70 @@ class Module:
         """List all properties for this module."""
         return self._properties
 
+    def get_memory(self) -> MemoryBackend | None:
+        """Return the module memory backend, if initialized."""
+        return self._memory
+
+    def get_action_table(self, channel: int) -> ActionTable | None:
+        """Return the action table for a channel, if this module has one."""
+        return self._action_tables.get(channel)
+
+    def get_action_tables(self) -> dict[int, ActionTable]:
+        """Return all action tables for this module."""
+        return dict(self._action_tables)
+
+    def get_channel_enable_spec(self, channel: int) -> dict[str, int] | None:
+        """Return EEPROM enable/disable metadata for a channel, if supported."""
+        spec = self._data.get("Memory", {}).get("ChannelEnable")
+        if not spec:
+            return None
+        address = spec.get("channels", {}).get(f"{channel:02d}")
+        if address is None:
+            return None
+        return {
+            "address": int(str(address), 16),
+            "disabled_value": int(spec.get("disabled_value", 0xFF)),
+            "enabled_value": int(spec.get("enabled_value", 0x01)),
+        }
+
+    def get_temp_settings(self) -> TemperatureSettings | None:
+        """Return the temperature settings helper, if this module supports it."""
+        return self._temp_settings
+
+    async def load_action_table(
+        self, channel: int, *, force: bool = False
+    ) -> list[ActionSlot]:
+        """Load (or reload) the action table for a channel."""
+        table = self.get_action_table(channel)
+        if table is None:
+            return []
+        return await table.load(force=force)
+
+    def _channel_name_range(self, channel: int) -> tuple[int, int] | None:
+        """Return (start, length) for a channel name memory range."""
+        memory = self._data.get("Memory", {})
+        channels = memory.get("Channels", {})
+        key = f"{channel:02d}"
+        if key not in channels:
+            return None
+        start_str, end_str = str(channels[key]).split("-")
+        start = int(start_str, 16)
+        end = int(end_str, 16)
+        return start, end - start + 1
+
+    async def set_channel_name_persistent(self, channel: int, name: str) -> None:
+        """Write a channel name into module EEPROM and update the local name."""
+        if self._memory is None:
+            raise RuntimeError("Module memory backend is not initialized")
+        name_range = self._channel_name_range(channel)
+        if name_range is None:
+            raise ValueError(f"Channel {channel} has no name memory range")
+        start, length = name_range
+        await self._memory.write_bytes(start, encode_name(name, length))
+        if channel in self._channels:
+            self._channels[channel].set_name(decode_name(encode_name(name, length)))
+            await self._cache()
+
     async def load_from_vlp(self, vlp_data) -> None:
         """Initialize the module from VLP data."""
         self._is_loading = True
@@ -1065,6 +1173,8 @@ class Module:
     async def _process_memory_data_block_message(
         self, message: MemoryDataBlockMessage
     ) -> None:
+        if self._memory is not None:
+            self._memory.feed_message(message)
         addr = f"{message.high_address:02X}{message.low_address:02X}"
         if "Memory" not in self._data:
             return
@@ -1108,7 +1218,9 @@ class Module:
                 break
 
     async def _process_memory_data_message(self, message: MemoryDataMessage) -> None:
-        addr_int = (message.high_address << 8) + message.low_address
+        if self._memory is not None:
+            self._memory.feed_message(message)
+        addr_int = join_address(message.high_address, message.low_address)
         addr = f"{message.high_address:02X}{message.low_address:02X}"
         if "Memory" not in self._data:
             return

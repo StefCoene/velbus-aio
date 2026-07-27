@@ -424,6 +424,36 @@ class TemperatureField(Field):
         return bytes([raw >> 8, raw & 0xFF])
 
 
+class HalfDegreeField(Field):
+    """One-byte temperature with 0.5°C resolution (two's complement when signed)."""
+
+    def __init__(
+        self,
+        byte_index: int,
+        default: float = 0.0,
+        *,
+        signed: bool = True,
+        **kwargs: Any,
+    ) -> None:
+        """Initialize half-degree temperature field."""
+        super().__init__(byte_index=byte_index, default=default, **kwargs)
+        self.signed = signed
+
+    def parse(self, data: bytes) -> float:
+        """Parse a half-degree temperature byte."""
+        assert self.byte_index is not None
+        if self.byte_index >= len(data):
+            return self.default
+        raw = data[self.byte_index]
+        if self.signed and raw & 0x80:
+            raw -= 0x100
+        return raw / 2
+
+    def serialize(self, value: float) -> bytes:
+        """Serialize a half-degree temperature byte."""
+        return bytes([int(round(value * 2)) & 0xFF])
+
+
 class StringField(Field):
     """String field for text data."""
 

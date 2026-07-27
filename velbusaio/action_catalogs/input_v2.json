@@ -1,0 +1,204 @@
+{
+  "id": "input_v2",
+  "description": "Velbus -20 / glass-panel input linked-button actions",
+  "actions": {
+    "00": {
+      "key": "switch_status_led",
+      "label": "Switch status LED indication",
+      "times": 0
+    },
+    "01": {
+      "key": "lock_closed",
+      "label": "Lock channel at closed switch",
+      "times": 0
+    },
+    "02": {
+      "key": "lock_opened",
+      "label": "Lock channel at opened switch",
+      "times": 0
+    },
+    "03": {
+      "key": "lock_timeout",
+      "label": "Lock channel (timeout)",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "04": {
+      "key": "lock_unlock_timeout",
+      "label": "Lock/unlock channel (timeout)",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "05": { "key": "unlock", "label": "Unlock channel", "times": 0 },
+    "06": {
+      "key": "disable_program_closed",
+      "label": "Disable channel program at closed switch",
+      "times": 0
+    },
+    "07": {
+      "key": "disable_program_opened",
+      "label": "Disable channel program at opened switch",
+      "times": 0
+    },
+    "08": {
+      "key": "disable_program_timeout",
+      "label": "Disable channel program (timeout)",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "09": {
+      "key": "disable_enable_program_timeout",
+      "label": "Disable/enable channel program (timeout)",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "0A": {
+      "key": "enable_program",
+      "label": "Enable channel program",
+      "times": 0
+    },
+    "0B": {
+      "key": "select_no_programs",
+      "label": "Select no programs",
+      "times": 0
+    },
+    "0C": {
+      "key": "select_program_group_1",
+      "label": "Select program group 1",
+      "times": 0
+    },
+    "0D": {
+      "key": "toggle_program_group_1",
+      "label": "Toggle program group 1",
+      "times": 0
+    },
+    "0E": {
+      "key": "select_program_group_2",
+      "label": "Select program group 2",
+      "times": 0
+    },
+    "0F": {
+      "key": "toggle_program_group_2",
+      "label": "Toggle program group 2",
+      "times": 0
+    },
+    "10": {
+      "key": "select_program_group_3",
+      "label": "Select program group 3",
+      "times": 0
+    },
+    "11": {
+      "key": "toggle_program_group_3",
+      "label": "Toggle program group 3",
+      "times": 0
+    },
+    "12": {
+      "key": "enable_alarm1_closed",
+      "label": "Enable Alarm 1 at closed switch",
+      "times": 0
+    },
+    "13": {
+      "key": "enable_alarm1_opened",
+      "label": "Enable Alarm 1 at open switch",
+      "times": 0
+    },
+    "14": {
+      "key": "disable_alarm1_closed",
+      "label": "Disable Alarm 1 at closed switch",
+      "times": 0
+    },
+    "15": {
+      "key": "disable_alarm1_opened",
+      "label": "Disable Alarm 1 at open switch",
+      "times": 0
+    },
+    "16": { "key": "enable_alarm1", "label": "Enable Alarm 1", "times": 0 },
+    "17": {
+      "key": "toggle_alarm1",
+      "label": "Enable/Disable Alarm 1",
+      "times": 0
+    },
+    "18": { "key": "disable_alarm1", "label": "Disable Alarm 1", "times": 0 },
+    "19": {
+      "key": "enable_alarm2_closed",
+      "label": "Enable Alarm 2 at closed switch",
+      "times": 0
+    },
+    "1A": {
+      "key": "enable_alarm2_opened",
+      "label": "Enable Alarm 2 at open switch",
+      "times": 0
+    },
+    "1B": {
+      "key": "disable_alarm2_closed",
+      "label": "Disable Alarm 2 at closed switch",
+      "times": 0
+    },
+    "1C": {
+      "key": "disable_alarm2_opened",
+      "label": "Disable Alarm 2 at open switch",
+      "times": 0
+    },
+    "1D": { "key": "enable_alarm2", "label": "Enable Alarm 2", "times": 0 },
+    "1E": {
+      "key": "toggle_alarm2",
+      "label": "Enable/Disable Alarm 2",
+      "times": 0
+    },
+    "1F": { "key": "disable_alarm2", "label": "Disable Alarm 2", "times": 0 },
+    "20": {
+      "key": "enable_sunrise_closed",
+      "label": "Enable Sunrise at closed switch",
+      "times": 0
+    },
+    "21": {
+      "key": "enable_sunrise_opened",
+      "label": "Enable Sunrise at open switch",
+      "times": 0
+    },
+    "22": {
+      "key": "disable_sunrise_closed",
+      "label": "Disable Sunrise at closed switch",
+      "times": 0
+    },
+    "23": {
+      "key": "disable_sunrise_opened",
+      "label": "Disable Sunrise at open switch",
+      "times": 0
+    },
+    "24": { "key": "enable_sunrise", "label": "Enable Sunrise", "times": 0 },
+    "25": {
+      "key": "toggle_sunrise",
+      "label": "Enable/Disable Sunrise",
+      "times": 0
+    },
+    "26": { "key": "disable_sunrise", "label": "Disable Sunrise", "times": 0 },
+    "27": {
+      "key": "enable_sunset_closed",
+      "label": "Enable Sunset at closed switch",
+      "times": 0
+    },
+    "28": {
+      "key": "enable_sunset_opened",
+      "label": "Enable Sunset at open switch",
+      "times": 0
+    },
+    "29": {
+      "key": "disable_sunset_closed",
+      "label": "Disable Sunset at closed switch",
+      "times": 0
+    },
+    "2A": {
+      "key": "disable_sunset_opened",
+      "label": "Disable Sunset at open switch",
+      "times": 0
+    },
+    "2B": { "key": "enable_sunset", "label": "Enable Sunset", "times": 0 },
+    "2C": {
+      "key": "toggle_sunset",
+      "label": "Enable/Disable Sunset",
+      "times": 0
+    },
+    "2D": { "key": "disable_sunset", "label": "Disable Sunset", "times": 0 }
+  }
+}

@@ -169,18 +169,80 @@ class TestTempSensorSettingsRequest:
 class TestTempSensorSettingsParts:
     """Tests for TempSensorSettingsPart1..4."""
 
-    @pytest.mark.parametrize(
-        ("cls", "code"),
-        [
-            (TempSensorSettingsPart1, 0xE8),
-            (TempSensorSettingsPart2, 0xE9),
-            (TempSensorSettingsPart3, 0xC6),
-            (TempSensorSettingsPart4, 0xB9),
-        ],
-    )
-    def test_data_to_binary(self, cls, code):
-        """Test Data to binary."""
-        assert cls().data_to_binary() == bytes([code])
+    def test_part1_roundtrip(self):
+        """Test Part1 populate / data_to_binary."""
+        msg = TempSensorSettingsPart1()
+        msg.populate(
+            PRIORITY_LOW,
+            0x01,
+            False,
+            bytes([40, 42, 40, 36, 10, 4, 1]),
+        )
+        assert msg.current_set == 20.0
+        assert msg.comfort_heating == 21.0
+        assert msg.day_heating == 20.0
+        assert msg.night_heating == 18.0
+        assert msg.antifreeze_heating == 5.0
+        assert msg.temp_difference == 2.0
+        assert msg.hysteresis == 0.5
+        assert msg.data_to_binary() == bytes([0xE8, 40, 42, 40, 36, 10, 4, 1])
+
+    def test_part2_roundtrip(self):
+        """Test Part2 populate / data_to_binary."""
+        msg = TempSensorSettingsPart2()
+        msg.populate(
+            PRIORITY_LOW,
+            0x01,
+            False,
+            bytes([44, 42, 40, 38, 0x00, 0x3C, 30]),
+        )
+        assert msg.comfort_cooling == 22.0
+        assert msg.default_sleep_timer == 60
+        assert msg.autosend_interval == 30
+        assert msg.data_to_binary() == bytes([0xE9, 44, 42, 40, 38, 0x00, 0x3C, 30])
+
+    def test_part3_classic_and_gp(self):
+        """Test Part3 layouts."""
+        classic = TempSensorSettingsPart3(layout="classic")
+        classic.populate(
+            PRIORITY_LOW,
+            0x01,
+            False,
+            bytes([10, 60, 16, 50, 0, 0xFF]),
+        )
+        assert classic.alarm_low == 5.0
+        assert classic.alarm_high == 30.0
+        assert classic.slave_or_zone == 0xFF
+        assert classic.data_to_binary() == bytes([0xC6, 10, 60, 16, 50, 0, 0xFF])
+
+        gp = TempSensorSettingsPart3(layout="gp")
+        gp.populate(
+            PRIORITY_LOW,
+            0x01,
+            False,
+            bytes([10, 60, 16, 50, 0, 1, 2]),
+        )
+        assert gp.calibration_gain == 2
+        assert gp.data_to_binary() == bytes([0xC6, 10, 60, 16, 50, 0, 1, 2])
+
+    def test_part4_classic_and_gp(self):
+        """Test Part4 layouts."""
+        classic = TempSensorSettingsPart4(layout="classic")
+        classic.populate(PRIORITY_LOW, 0x01, False, bytes([5]))
+        assert classic.min_switching_time == 5
+        assert classic.data_to_binary() == bytes([0xB9, 5])
+
+        gp = TempSensorSettingsPart4(layout="gp")
+        gp.populate(
+            PRIORITY_LOW,
+            0x01,
+            False,
+            bytes([5, 10, 20, 12, 14, 16, 40]),
+        )
+        assert gp.pump_delayed_on == 10
+        assert gp.alarm_2 == 6.0
+        assert gp.cool_upper == 20.0
+        assert gp.data_to_binary() == bytes([0xB9, 5, 10, 20, 12, 14, 16, 40])
 
 
 class TestModuleStatusRequestMessage:

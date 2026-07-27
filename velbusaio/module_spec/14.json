@@ -25,6 +25,16 @@
     "FF": "ModuleTypeMessage"
   },
   "Memory": {
+    "ActionTable": {
+      "actions": "dimmer_classic",
+      "channels": {
+        "01": {
+          "bank": "0000"
+        }
+      },
+      "slot_count": 37,
+      "slot_size": 6
+    },
     "Channels": {
       "01": "00F0-00FF"
     }

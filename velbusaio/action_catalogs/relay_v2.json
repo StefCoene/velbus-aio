@@ -1,0 +1,223 @@
+{
+  "id": "relay_v2",
+  "description": "V2 (-20) Velbus relay action numbers (shared table, param4 = subject channel)",
+  "actions": {
+    "00": { "key": "momentary", "label": "Momentary", "times": 0 },
+    "01": { "key": "off", "label": "Off", "times": 0 },
+    "02": {
+      "key": "off_timers_disabled",
+      "label": "Off with timers disabled",
+      "times": 0
+    },
+    "03": {
+      "key": "off_timers_disabled_short",
+      "label": "Off with timers disabled at short press",
+      "times": 0
+    },
+    "04": {
+      "key": "off_timers_disabled_long",
+      "label": "Off with timers disabled at long press",
+      "times": 0
+    },
+    "05": { "key": "on", "label": "On", "times": 0 },
+    "06": {
+      "key": "on_timers_disabled",
+      "label": "On with timers disabled",
+      "times": 0
+    },
+    "07": {
+      "key": "on_timers_disabled_short",
+      "label": "On with timers disabled at short press",
+      "times": 0
+    },
+    "08": {
+      "key": "on_timers_disabled_long",
+      "label": "On with timers disabled at long press",
+      "times": 0
+    },
+    "09": { "key": "toggle", "label": "Toggle", "times": 0 },
+    "0A": {
+      "key": "toggle_timers_disabled",
+      "label": "Toggle with timers disabled",
+      "times": 0
+    },
+    "0B": {
+      "key": "toggle_timers_disabled_short",
+      "label": "Toggle with timers disabled at short press",
+      "times": 0
+    },
+    "0C": {
+      "key": "toggle_timers_disabled_long",
+      "label": "Toggle with timers disabled at long press",
+      "times": 0
+    },
+    "0D": {
+      "key": "start_stop_timer",
+      "label": "Start/stop timer",
+      "times": 2,
+      "time_labels": ["Timeout short/release", "Timeout long"]
+    },
+    "0E": {
+      "key": "restartable_timer",
+      "label": "Restartable timer",
+      "times": 2,
+      "time_labels": ["Timeout short/release", "Timeout long"]
+    },
+    "0F": {
+      "key": "non_retriggerable_timer",
+      "label": "Non-retriggerable timer",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "10": {
+      "key": "trigger_on_release_timer",
+      "label": "Trigger-on-release timer",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "11": {
+      "key": "delayed_on_with_delayed_off",
+      "label": "Delayed on during closed/open with delayed off",
+      "times": 2,
+      "time_labels": ["Delay-off time", "Delay-on time"]
+    },
+    "12": {
+      "key": "delayed_off_when_on",
+      "label": "Delayed off only when relay is on",
+      "times": 1,
+      "time_labels": ["Delay-off time"]
+    },
+    "13": {
+      "key": "start_stop_delayed_on",
+      "label": "Start/stop delayed On",
+      "times": 2,
+      "time_labels": ["Timeout", "Delay-on time"]
+    },
+    "14": {
+      "key": "restartable_delayed_on",
+      "label": "Restartable delayed On",
+      "times": 2,
+      "time_labels": ["Timeout", "Delay-on time"]
+    },
+    "15": {
+      "key": "non_restartable_delayed_on",
+      "label": "Non-restartable delayed On",
+      "times": 2,
+      "time_labels": ["Timeout", "Delay-on time"]
+    },
+    "16": {
+      "key": "start_stop_interval",
+      "label": "Start/stop interval timer",
+      "times": 3,
+      "time_labels": ["Timeout", "Pulse time", "Pause time"]
+    },
+    "17": {
+      "key": "restartable_interval",
+      "label": "Restartable interval timer",
+      "times": 3,
+      "time_labels": ["Timeout", "Pulse time", "Pause time"]
+    },
+    "18": {
+      "key": "non_restartable_interval",
+      "label": "Non-restartable interval timer",
+      "times": 3,
+      "time_labels": ["Timeout", "Pulse time", "Pause time"]
+    },
+    "19": {
+      "key": "interval_during_closed_open",
+      "label": "Interval during closed/open switch",
+      "times": 2,
+      "time_labels": ["Pulse time", "Pause time"]
+    },
+    "1A": {
+      "key": "short_pulse",
+      "label": "Short pulse (0.5 sec)",
+      "times": 0
+    },
+    "1B": {
+      "key": "short_pulse_interval_during_closed_open",
+      "label": "Short pulse interval during closed/open",
+      "times": 0
+    },
+    "1C": {
+      "key": "start_stop_short_pulse_interval",
+      "label": "Start/stop short pulse interval timer",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "1D": {
+      "key": "restartable_short_pulse_interval",
+      "label": "Restartable short pulse interval timer",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "1E": {
+      "key": "non_restartable_short_pulse_interval",
+      "label": "Non-restartable short pulse interval timer",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "1F": {
+      "key": "forced_off_during_closed_open",
+      "label": "Forced Off during closed/open switch",
+      "times": 0
+    },
+    "20": {
+      "key": "forced_off",
+      "label": "Forced Off",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "21": {
+      "key": "toggle_forced_off",
+      "label": "Toggle forced Off",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "22": {
+      "key": "cancel_forced_off",
+      "label": "Cancel forced Off",
+      "times": 0
+    },
+    "23": {
+      "key": "forced_on_during_closed_open",
+      "label": "Forced On during closed/open switch",
+      "times": 0
+    },
+    "24": {
+      "key": "forced_on",
+      "label": "Forced On",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "25": {
+      "key": "toggle_forced_on",
+      "label": "Toggle forced On",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "26": {
+      "key": "cancel_forced_on",
+      "label": "Cancel Forced On",
+      "times": 0
+    },
+    "27": {
+      "key": "inhibit_during_closed_open",
+      "label": "Inhibit during closed/open switch",
+      "times": 0
+    },
+    "28": {
+      "key": "inhibit",
+      "label": "Inhibit",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "29": {
+      "key": "toggle_inhibit",
+      "label": "Toggle inhibit",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "2A": { "key": "cancel_inhibit", "label": "Cancel inhibit", "times": 0 }
+  }
+}

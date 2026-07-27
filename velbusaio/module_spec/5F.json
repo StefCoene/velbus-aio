@@ -123,6 +123,32 @@
     "FF": "ModuleType2Message"
   },
   "Memory": {
+    "ActionTable": {
+      "actions": "input_v2",
+      "bank": "03E0",
+      "channels": {
+        "01": {},
+        "02": {},
+        "03": {},
+        "04": {}
+      },
+      "kind": "input",
+      "layout": "shared",
+      "release_bit": false,
+      "slot_count": 63,
+      "slot_size": 5,
+      "subject_encoding": "param2"
+    },
+    "ChannelEnable": {
+      "channels": {
+        "01": "002C",
+        "02": "0040",
+        "03": "0054",
+        "04": "0068"
+      },
+      "disabled_value": 255,
+      "enabled_value": 1
+    },
     "Channels": {
       "01": "001C-002B",
       "02": "0030-003F",

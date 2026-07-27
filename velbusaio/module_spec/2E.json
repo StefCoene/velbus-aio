@@ -35,6 +35,16 @@
     "FF": "ModuleTypeMessage"
   },
   "Memory": {
+    "ActionTable": {
+      "actions": "blind_classic",
+      "channels": {
+        "01": {
+          "bank": "0100"
+        }
+      },
+      "slot_count": 25,
+      "slot_size": 5
+    },
     "Channels": {
       "01": "0000-000F"
     },

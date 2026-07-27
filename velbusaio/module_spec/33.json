@@ -60,6 +60,22 @@
     "FF": "ModuleTypeMessage"
   },
   "Memory": {
+    "ActionTable": {
+      "actions": "input_classic",
+      "bank": "0100",
+      "channels": {
+        "03": {},
+        "04": {},
+        "07": {},
+        "08": {}
+      },
+      "kind": "input",
+      "layout": "shared",
+      "release_bit": false,
+      "slot_count": 25,
+      "slot_size": 5,
+      "subject_encoding": "param2_bitmask"
+    },
     "Channels": {
       "07": "0000-000F",
       "08": "0010-001F"

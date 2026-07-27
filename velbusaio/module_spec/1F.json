@@ -126,6 +126,40 @@
     "FF": "ModuleTypeMessage"
   },
   "Memory": {
+    "ActionTable": {
+      "actions": "input_classic",
+      "bank": "0110",
+      "channels": {
+        "01": {},
+        "02": {},
+        "03": {},
+        "04": {},
+        "05": {},
+        "06": {},
+        "07": {},
+        "08": {}
+      },
+      "kind": "input",
+      "layout": "shared",
+      "release_bit": false,
+      "slot_count": 48,
+      "slot_size": 5,
+      "subject_encoding": "param2"
+    },
+    "ChannelEnable": {
+      "channels": {
+        "01": "0010",
+        "02": "0024",
+        "03": "0038",
+        "04": "004C",
+        "05": "0060",
+        "06": "0074",
+        "07": "0088",
+        "08": "009C"
+      },
+      "disabled_value": 255,
+      "enabled_value": 1
+    },
     "Channels": {
       "01": "0000-000F",
       "02": "0014-0023",

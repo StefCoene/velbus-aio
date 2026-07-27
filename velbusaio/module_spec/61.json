@@ -42,6 +42,18 @@
     "FF": "ModuleType2Message"
   },
   "Memory": {
+    "ActionTable": {
+      "actions": "blind_v2",
+      "bank": "0088",
+      "channels": {
+        "01": {},
+        "02": {}
+      },
+      "layout": "shared",
+      "slot_count": 154,
+      "slot_size": 6,
+      "subject_encoding": "param3"
+    },
     "Channels": {
       "01": "0000-000F",
       "02": "001C-002B"

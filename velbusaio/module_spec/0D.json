@@ -71,6 +71,40 @@
     "FF": "ModuleType2Message"
   },
   "Memory": {
+    "ActionTable": {
+      "actions": "relay_v2",
+      "bank": "00E8",
+      "channels": {
+        "01": {
+          "noc_address": "0010"
+        },
+        "02": {
+          "noc_address": "0024"
+        },
+        "03": {
+          "noc_address": "0038"
+        },
+        "04": {
+          "noc_address": "004C"
+        },
+        "05": {
+          "noc_address": "0060"
+        },
+        "06": {
+          "noc_address": "0074"
+        },
+        "07": {
+          "noc_address": "0088"
+        },
+        "08": {
+          "noc_address": "009C"
+        }
+      },
+      "layout": "shared",
+      "slot_count": 144,
+      "slot_size": 7,
+      "subject_encoding": "param4"
+    },
     "Channels": {
       "01": "0000-000F",
       "02": "0014-0023",

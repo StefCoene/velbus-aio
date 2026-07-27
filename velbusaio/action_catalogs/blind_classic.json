@@ -1,0 +1,381 @@
+{
+  "id": "blind_classic",
+  "description": "Classic Velbus blind action codes (VMB2BLE / VMB1BLS / VMB2BLE-10)",
+  "actions": {
+    "00": {
+      "key": "up",
+      "label": "Up",
+      "times": 1,
+      "time_labels": ["Pulse time"]
+    },
+    "01": {
+      "key": "direct_up",
+      "label": "Direct up",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "02": {
+      "key": "direct_up_at_release",
+      "label": "Direct up at release",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "03": {
+      "key": "down",
+      "label": "Down",
+      "times": 1,
+      "time_labels": ["Pulse time"]
+    },
+    "04": {
+      "key": "direct_down",
+      "label": "Direct down",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "05": {
+      "key": "direct_down_at_release",
+      "label": "Direct down at release",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "06": {
+      "key": "up_down",
+      "label": "Up/down",
+      "times": 0
+    },
+    "07": {
+      "key": "go_to_position",
+      "label": "Go to position",
+      "times": 2,
+      "time_labels": ["Delayed on time", "Position (0 to 100%)"]
+    },
+    "08": {
+      "key": "go_to_position_at_release",
+      "label": "Go to position at release",
+      "times": 2,
+      "time_labels": ["Delayed on time", "Position (0 to 100%)"]
+    },
+    "09": {
+      "key": "up_mode1",
+      "label": "Up in auto mode 1",
+      "times": 1,
+      "time_labels": ["Pulse time"]
+    },
+    "0A": {
+      "key": "direct_up_mode1",
+      "label": "Direct up in auto mode 1",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "0B": {
+      "key": "direct_up_at_release_mode1",
+      "label": "Direct up at release in auto mode 1",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "0C": {
+      "key": "down_mode1",
+      "label": "Down in auto mode 1",
+      "times": 1,
+      "time_labels": ["Pulse time"]
+    },
+    "0D": {
+      "key": "direct_down_mode1",
+      "label": "Direct down in auto mode 1",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "0E": {
+      "key": "direct_down_at_release_mode1",
+      "label": "Direct down at release in auto mode 1",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "0F": {
+      "key": "up_down_mode1",
+      "label": "Up/down in auto mode 1",
+      "times": 0
+    },
+    "10": {
+      "key": "go_to_position_mode1",
+      "label": "Go to position in auto mode 1",
+      "times": 2,
+      "time_labels": ["Delayed on time", "Position (0 to 100%)"]
+    },
+    "11": {
+      "key": "go_to_position_at_release_mode1",
+      "label": "Go to position at release in auto mode 1",
+      "times": 2,
+      "time_labels": ["Delayed on time", "Position (0 to 100%)"]
+    },
+    "12": {
+      "key": "select_mode1",
+      "label": "Select auto mode 1",
+      "times": 0
+    },
+    "13": {
+      "key": "select_mode1_at_release",
+      "label": "Select auto mode 1 at release",
+      "times": 0
+    },
+    "14": {
+      "key": "toggle_mode1",
+      "label": "Select/deselect auto mode 1",
+      "times": 0
+    },
+    "15": {
+      "key": "deselect_mode",
+      "label": "Deselect auto mode",
+      "times": 0
+    },
+    "16": {
+      "key": "deselect_mode_at_release",
+      "label": "Deselect auto mode at release",
+      "times": 0
+    },
+    "17": {
+      "key": "up_mode2",
+      "label": "Up in auto mode 2",
+      "times": 1,
+      "time_labels": ["Pulse time"]
+    },
+    "18": {
+      "key": "direct_up_mode2",
+      "label": "Direct up in auto mode 2",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "19": {
+      "key": "direct_up_at_release_mode2",
+      "label": "Direct up at release in auto mode 2",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "1A": {
+      "key": "down_mode2",
+      "label": "Down in auto mode 2",
+      "times": 1,
+      "time_labels": ["Pulse time"]
+    },
+    "1B": {
+      "key": "direct_down_mode2",
+      "label": "Direct down in auto mode 2",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "1C": {
+      "key": "direct_down_at_release_mode2",
+      "label": "Direct down at release in auto mode 2",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "1D": {
+      "key": "up_down_mode2",
+      "label": "Up/down in auto mode 2",
+      "times": 0
+    },
+    "1E": {
+      "key": "go_to_position_mode2",
+      "label": "Go to position in auto mode 2",
+      "times": 2,
+      "time_labels": ["Delayed on time", "Position (0 to 100%)"]
+    },
+    "1F": {
+      "key": "go_to_position_at_release_mode2",
+      "label": "Go to position at release in auto mode 2",
+      "times": 2,
+      "time_labels": ["Delayed on time", "Position (0 to 100%)"]
+    },
+    "20": {
+      "key": "select_mode2",
+      "label": "Select auto mode 2",
+      "times": 0
+    },
+    "21": {
+      "key": "select_mode2_at_release",
+      "label": "Select auto mode 2 at release",
+      "times": 0
+    },
+    "22": {
+      "key": "toggle_mode2",
+      "label": "Select/deselect auto mode 2",
+      "times": 0
+    },
+    "23": {
+      "key": "up_mode3",
+      "label": "Up in auto mode 3",
+      "times": 1,
+      "time_labels": ["Pulse time"]
+    },
+    "24": {
+      "key": "direct_up_mode3",
+      "label": "Direct up in auto mode 3",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "25": {
+      "key": "direct_up_at_release_mode3",
+      "label": "Direct up at release in auto mode 3",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "26": {
+      "key": "down_mode3",
+      "label": "Down in auto mode 3",
+      "times": 1,
+      "time_labels": ["Pulse time"]
+    },
+    "27": {
+      "key": "direct_down_mode3",
+      "label": "Direct down in auto mode 3",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "28": {
+      "key": "direct_down_at_release_mode3",
+      "label": "Direct down at release in auto mode 3",
+      "times": 1,
+      "time_labels": ["Delayed on time"]
+    },
+    "29": {
+      "key": "up_down_mode3",
+      "label": "Up/down in auto mode 3",
+      "times": 0
+    },
+    "2A": {
+      "key": "go_to_position_mode3",
+      "label": "Go to position in auto mode 3",
+      "times": 2,
+      "time_labels": ["Delayed on time", "Position (0 to 100%)"]
+    },
+    "2B": {
+      "key": "go_to_position_at_release_mode3",
+      "label": "Go to position at release in auto mode 3",
+      "times": 2,
+      "time_labels": ["Delayed on time", "Position (0 to 100%)"]
+    },
+    "2C": {
+      "key": "select_mode3",
+      "label": "Select auto mode 3",
+      "times": 0
+    },
+    "2D": {
+      "key": "select_mode3_at_release",
+      "label": "Select auto mode 3 at release",
+      "times": 0
+    },
+    "2E": {
+      "key": "toggle_mode3",
+      "label": "Select/deselect auto mode 3",
+      "times": 0
+    },
+    "2F": {
+      "key": "lock_at_closed",
+      "label": "Lock at closed switch",
+      "times": 0
+    },
+    "30": {
+      "key": "lock_at_opened",
+      "label": "Lock at open switch",
+      "times": 0
+    },
+    "31": {
+      "key": "lock",
+      "label": "Lock",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "32": {
+      "key": "toggle_lock",
+      "label": "Lock/unlock",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "33": {
+      "key": "unlock",
+      "label": "Unlock",
+      "times": 0
+    },
+    "34": {
+      "key": "forced_up_at_closed",
+      "label": "Forced up at closed switch",
+      "times": 0
+    },
+    "35": {
+      "key": "forced_up_at_opened",
+      "label": "Forced up at open switch",
+      "times": 0
+    },
+    "36": {
+      "key": "forced_up",
+      "label": "Forced up",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "37": {
+      "key": "toggle_forced_up",
+      "label": "Forced up/cancel forced up",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "38": {
+      "key": "cancel_forced_up",
+      "label": "Cancel forced up",
+      "times": 0
+    },
+    "39": {
+      "key": "forced_down_at_closed",
+      "label": "Forced down at closed switch",
+      "times": 0
+    },
+    "3A": {
+      "key": "forced_down_at_opened",
+      "label": "Forced down at open switch",
+      "times": 0
+    },
+    "3B": {
+      "key": "forced_down",
+      "label": "Forced down",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "3C": {
+      "key": "toggle_forced_down",
+      "label": "Forced down/cancel forced down",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "3D": {
+      "key": "cancel_forced_down",
+      "label": "Cancel forced down",
+      "times": 0
+    },
+    "3E": {
+      "key": "inhibit_at_closed",
+      "label": "Inhibit at closed switch",
+      "times": 0
+    },
+    "3F": {
+      "key": "inhibit_at_opened",
+      "label": "Inhibit at open switch",
+      "times": 0
+    },
+    "40": {
+      "key": "inhibit",
+      "label": "Inhibit",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "41": {
+      "key": "toggle_inhibit",
+      "label": "Inhibit/cancel inhibit",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "42": {
+      "key": "cancel_inhibit",
+      "label": "Cancel inhibit",
+      "times": 0
+    }
+  }
+}

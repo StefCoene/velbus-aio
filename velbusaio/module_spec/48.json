@@ -56,6 +56,33 @@
     "FF": "ModuleType2Message"
   },
   "Memory": {
+    "ActionTable": {
+      "actions": "relay_classic",
+      "channels": {
+        "01": {
+          "bank": "0000",
+          "noc_address": "00D8"
+        },
+        "02": {
+          "bank": "0100",
+          "noc_address": "01D8"
+        },
+        "03": {
+          "bank": "0200",
+          "noc_address": "02D8"
+        },
+        "04": {
+          "bank": "0300",
+          "noc_address": "03D8"
+        },
+        "05": {
+          "bank": "0400",
+          "noc_address": "04D8"
+        }
+      },
+      "slot_count": 36,
+      "slot_size": 6
+    },
     "Channels": {
       "01": "00F0-00FF",
       "02": "01F0-01FF",

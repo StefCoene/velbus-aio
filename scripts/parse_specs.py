@@ -6,16 +6,23 @@ if any module spec declares a channel with "Editable": "yes" but the module
 spec does not contain the corresponding memory location under
 "Memory" -> "Channels" for that channel.
 
+It also validates optional Memory subsections used by the config panel /
+memory backend:
+
+- Memory.ActionTable — action-table layout, catalogs and per-channel banks
+- Memory.ChannelEnable — per-channel enable/disable EEPROM addresses
+
 Additionally, it validates that every module type in the MODULE_DIRECTORY from
 command_registry.py has a corresponding module spec file.
 
-This version fixes an AttributeError caused by MODULE_SPEC_DIR being a string
-instead of a pathlib.Path and makes locating the module_spec directory more
-robust (walks up from the script location to find the repo root).
+Pass ``--fix`` to rewrite every module spec with alphabetically sorted keys
+at every level. Sorting preserves all keys and values (including ActionTable
+and ChannelEnable); nothing is dropped.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 import sys
@@ -36,6 +43,22 @@ from validate_command_specs import validate_all  # noqa: E402
 
 # How many directory levels to walk up from this script to try to find the repo root
 _MAX_UP_LEVELS = 6
+
+_KNOWN_MEMORY_KEYS = frozenset(
+    {
+        "Address",
+        "ActionTable",
+        "ChannelEnable",
+        "Channels",
+        "Extras",
+        "ModuleName",
+        "SensorName",
+    }
+)
+
+_ACTION_TABLE_REQUIRED = frozenset(
+    {"actions", "channels", "slot_count", "slot_size"}
+)
 
 
 def h2(n: int) -> str:
@@ -62,6 +85,15 @@ def locate_module_spec_dir(start: Path | None = None) -> Path | None:
             return candidate
         p = p.parent
     return None
+
+
+def _sort_keys(data: Any) -> Any:
+    """Recursively sort dict keys alphabetically, preserving all values."""
+    if isinstance(data, dict):
+        return {key: _sort_keys(data[key]) for key in sorted(data)}
+    if isinstance(data, list):
+        return [_sort_keys(item) for item in data]
+    return data
 
 
 def _unsorted_keys(data: Any, path: str = "") -> list[str]:
@@ -91,18 +123,187 @@ def check_json_sorted(path: Path) -> list[str]:
     return []
 
 
-def validate_spec(path: Path) -> list[str]:
+def fix_json_sorted(path: Path) -> bool:
+    """Rewrite *path* with alphabetically sorted keys. Returns True if changed.
+
+    All existing keys and values are preserved; only key order is normalized.
+    """
+    try:
+        spec = load_json(path)
+    except Exception:
+        return False
+    new_text = json.dumps(_sort_keys(spec), indent=2, ensure_ascii=False) + "\n"
+    old_text = path.read_text(encoding="utf-8")
+    if new_text == old_text:
+        return False
+    path.write_text(new_text, encoding="utf-8")
+    return True
+
+
+def _parse_hex_address(value: Any) -> int | None:
+    """Parse a hex memory address string (e.g. '00EC' or '0x00EC')."""
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        return int(value, 16) if value.lower().startswith("0x") else int(value, 16)
+    except ValueError:
+        return None
+
+
+def _validate_action_table(path: Path, action_table: Any) -> list[str]:
+    """Validate Memory.ActionTable structure used by build_action_tables()."""
+    errors: list[str] = []
+    prefix = f"{path}: Memory.ActionTable"
+
+    if not isinstance(action_table, dict):
+        return [f"{prefix} must be an object"]
+
+    missing = _ACTION_TABLE_REQUIRED - action_table.keys()
+    if missing:
+        errors.append(
+            f"{prefix} missing required keys: {', '.join(sorted(missing))}"
+        )
+
+    catalog_id = action_table.get("actions")
+    if catalog_id is not None:
+        if not isinstance(catalog_id, str) or not catalog_id:
+            errors.append(f"{prefix}.actions must be a non-empty string")
+        else:
+            catalog_path = (
+                _REPO_ROOT / "velbusaio" / "action_catalogs" / f"{catalog_id}.json"
+            )
+            if not catalog_path.is_file():
+                errors.append(
+                    f"{prefix}.actions references unknown catalog '{catalog_id}' "
+                    f"(expected {catalog_path.name})"
+                )
+
+    for int_key in ("slot_count", "slot_size"):
+        if int_key in action_table and not isinstance(action_table[int_key], int):
+            errors.append(f"{prefix}.{int_key} must be an integer")
+
+    layout = action_table.get("layout", "per_channel")
+    if layout not in ("per_channel", "shared"):
+        errors.append(
+            f"{prefix}.layout must be 'per_channel' or 'shared' (got {layout!r})"
+        )
+
+    if layout == "shared":
+        if "bank" not in action_table:
+            errors.append(f"{prefix} shared layout requires 'bank'")
+        elif _parse_hex_address(action_table["bank"]) is None:
+            errors.append(f"{prefix}.bank must be a hex address string")
+
+    channels = action_table.get("channels")
+    if channels is None:
+        return errors
+    if not isinstance(channels, dict):
+        errors.append(f"{prefix}.channels must be an object")
+        return errors
+
+    for chan_key, chan_spec in channels.items():
+        try:
+            int(chan_key)
+        except (TypeError, ValueError):
+            errors.append(f"{prefix}.channels key '{chan_key}' is not an integer")
+            continue
+        if not isinstance(chan_spec, dict):
+            errors.append(f"{prefix}.channels.{chan_key} must be an object")
+            continue
+        if layout != "shared":
+            if "bank" not in chan_spec:
+                errors.append(
+                    f"{prefix}.channels.{chan_key} per_channel layout requires 'bank'"
+                )
+            elif _parse_hex_address(chan_spec["bank"]) is None:
+                errors.append(
+                    f"{prefix}.channels.{chan_key}.bank must be a hex address string"
+                )
+        if "noc_address" in chan_spec and _parse_hex_address(
+            chan_spec["noc_address"]
+        ) is None:
+            errors.append(
+                f"{prefix}.channels.{chan_key}.noc_address must be a hex address string"
+            )
+
+    return errors
+
+
+def _validate_channel_enable(path: Path, enable: Any) -> list[str]:
+    """Validate Memory.ChannelEnable structure."""
+    errors: list[str] = []
+    prefix = f"{path}: Memory.ChannelEnable"
+
+    if not isinstance(enable, dict):
+        return [f"{prefix} must be an object"]
+
+    for int_key in ("disabled_value", "enabled_value"):
+        if int_key in enable and not isinstance(enable[int_key], int):
+            errors.append(f"{prefix}.{int_key} must be an integer")
+
+    channels = enable.get("channels")
+    if channels is None:
+        errors.append(f"{prefix} missing required key 'channels'")
+        return errors
+    if not isinstance(channels, dict):
+        errors.append(f"{prefix}.channels must be an object")
+        return errors
+
+    for chan_key, address in channels.items():
+        try:
+            int(chan_key)
+        except (TypeError, ValueError):
+            errors.append(f"{prefix}.channels key '{chan_key}' is not an integer")
+            continue
+        if _parse_hex_address(address) is None:
+            errors.append(
+                f"{prefix}.channels.{chan_key} must be a hex address string "
+                f"(got {address!r})"
+            )
+
+    return errors
+
+
+def validate_memory_sections(path: Path, memory: Any) -> list[str]:
+    """Validate optional Memory subsections (ActionTable, ChannelEnable, …)."""
+    errors: list[str] = []
+    if memory is None:
+        return errors
+    if not isinstance(memory, dict):
+        return [f"{path}: Memory must be an object"]
+
+    unknown = set(memory) - _KNOWN_MEMORY_KEYS
+    if unknown:
+        # Warn-style: keep as errors so new keys are reviewed, but do not strip them.
+        errors.append(
+            f"{path}: Memory has unknown keys {sorted(unknown)} "
+            f"(known: {sorted(_KNOWN_MEMORY_KEYS)})"
+        )
+
+    if "ActionTable" in memory:
+        errors.extend(_validate_action_table(path, memory["ActionTable"]))
+    if "ChannelEnable" in memory:
+        errors.extend(_validate_channel_enable(path, memory["ChannelEnable"]))
+
+    return errors
+
+
+def validate_spec(path: Path) -> tuple[list[str], list[str]]:
+    """Validate one module spec. Returns (errors, warnings)."""
     errors: list[str] = []
     warnings: list[str] = []
     try:
         spec = load_json(path)
     except Exception as exc:
         errors.append(f"{path}: failed to load JSON: {exc}")
-        return errors
+        return errors, warnings
 
     channels = spec.get("Channels", {})
     memory = spec.get("Memory")
 
+    errors.extend(validate_memory_sections(path, memory))
+
+    missing_channels_warned = False
     for chan_key, chan_data in channels.items():
         try:
             chan_num = int(chan_key)
@@ -111,48 +312,51 @@ def validate_spec(path: Path) -> list[str]:
             continue
 
         editable = chan_data.get("Editable", "") == "yes"
-
-        if memory is None:
-            errors.append(
-                f"{path}: channel {chan_num} (editable) but module spec is missing top-level 'Memory'"
-            )
-            continue
-
-        mem_channels = memory.get("Channels")
-        if mem_channels is None:
-            warnings.append(
-                f"{path}: channel {chan_num} (editable) but 'Memory' does not contain 'Channels'"
-            )
-            continue
-
         possible_key = str(chan_num).zfill(2)
+        mem_channels = memory.get("Channels") if isinstance(memory, dict) else None
 
-        if possible_key not in mem_channels and editable:
+        if editable and memory is None:
             errors.append(
-                f"{path}: channel {chan_num} (editable) but no memory location found in Memory->Channels for key {possible_key}"
+                f"{path}: channel {chan_num} (editable) but module spec is missing "
+                "top-level 'Memory'"
+            )
+            continue
+
+        if editable and isinstance(memory, dict) and mem_channels is None:
+            # Some modules (e.g. VMB8PB) declare editable channels but only expose
+            # ModuleName in Memory — keep as a warning so validation still passes.
+            if not missing_channels_warned:
+                warnings.append(
+                    f"{path}: editable channels present but 'Memory' does not "
+                    "contain 'Channels'"
+                )
+                missing_channels_warned = True
+            continue
+
+        if editable and mem_channels is not None and possible_key not in mem_channels:
+            errors.append(
+                f"{path}: channel {chan_num} (editable) but no memory location found "
+                f"in Memory->Channels for key {possible_key}"
             )
 
         ctype = chan_data.get("Type", "")
-        if ctype in [
-            "Blind",
-            "Button",
-            "ButtonCounter",
-            "Dimmer",
-            "Temperature",
-            "Relay",
-        ]:
-            if chan_data.get("Editable", "") == "":
-                errors.append(
-                    f"{path}: channel {chan_num} of type {ctype} but editable field is missing"
-                )
-            if chan_data.get("Editable", "") == "yes" and (
-                mem_channels is None or possible_key not in mem_channels
-            ):
-                errors.append(
-                    f"{path}: channel {chan_num} of type {ctype} is editable but no memory location found in Memory->Channels for key {possible_key}"
-                )
+        if (
+            ctype
+            in [
+                "Blind",
+                "Button",
+                "ButtonCounter",
+                "Dimmer",
+                "Temperature",
+                "Relay",
+            ]
+            and chan_data.get("Editable", "") == ""
+        ):
+            errors.append(
+                f"{path}: channel {chan_num} of type {ctype} but editable field is missing"
+            )
 
-    return errors
+    return errors, warnings
 
 
 def validate_command_to_class(path: Path, spec: dict) -> list[str]:
@@ -277,13 +481,26 @@ def check_empty_command_to_class(module_spec_dir: Path) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    argv = argv or sys.argv[1:]
+    parser = argparse.ArgumentParser(
+        description="Validate (and optionally fix) velbusaio module_spec JSON files."
+    )
+    parser.add_argument(
+        "repo",
+        nargs="?",
+        default=None,
+        help="Optional path to the repo root (or a path containing velbusaio/module_spec).",
+    )
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        help=(
+            "Rewrite module specs with alphabetically sorted keys at every level. "
+            "Preserves all keys and values (ActionTable, ChannelEnable, …)."
+        ),
+    )
+    args = parser.parse_args(argv)
 
-    # optional first arg: path to repo root (or path that contains velbusaio/module_spec)
-    start_path = None
-    if len(argv) >= 1 and argv[0].strip():
-        start_path = Path(argv[0]).resolve()
-
+    start_path = Path(args.repo).resolve() if args.repo else None
     module_spec_dir = locate_module_spec_dir(start_path)
     if module_spec_dir is None:
         print(
@@ -300,7 +517,15 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
+    if args.fix:
+        fixed = 0
+        for path in spec_files:
+            if fix_json_sorted(path):
+                fixed += 1
+        print(f"Sorted keys in {fixed}/{len(spec_files)} module spec files.")
+
     all_errors: list[str] = []
+    all_warnings: list[str] = []
 
     # Check that all modules in MODULE_DIRECTORY have spec files
     print("Checking MODULE_DIRECTORY coverage...")
@@ -320,7 +545,9 @@ def main(argv: list[str] | None = None) -> int:
         except Exception as exc:
             all_errors.append(f"{p}: failed to load JSON: {exc}")
             continue
-        all_errors.extend(validate_spec(p))
+        spec_errors, spec_warnings = validate_spec(p)
+        all_errors.extend(spec_errors)
+        all_warnings.extend(spec_warnings)
         all_errors.extend(validate_command_to_class(p, spec))
         all_errors.extend(check_json_sorted(p))
 
@@ -333,8 +560,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print("All CommandToClass entries are complete and consistent.")
 
-    # Non-fatal warnings: orphan specs and empty CommandToClass.
-    all_warnings: list[str] = []
+    # Non-fatal warnings: orphan specs, empty CommandToClass, incomplete Memory.
     all_warnings.extend(check_orphan_specs(module_spec_dir))
     all_warnings.extend(check_empty_command_to_class(module_spec_dir))
     if all_warnings:
@@ -351,6 +577,7 @@ def main(argv: list[str] | None = None) -> int:
     print("\nModule spec validation passed:")
     print(" - All modules in MODULE_DIRECTORY have spec files")
     print(" - All editable channels have memory locations")
+    print(" - All Memory.ActionTable / ChannelEnable sections are valid")
     print(" - All CommandToClass entries reference known message classes")
     print(" - All JSON files have alphabetically sorted keys")
     print(" - All CommandToClass entries are complete and consistent")

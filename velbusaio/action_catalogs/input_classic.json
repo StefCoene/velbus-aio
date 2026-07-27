@@ -1,0 +1,116 @@
+{
+  "id": "input_classic",
+  "description": "Classic Velbus input / LED linked-button actions (VMB8PBU family)",
+  "actions": {
+    "00": {
+      "key": "switch_status_led",
+      "label": "Switch status LED indication",
+      "times": 0
+    },
+    "01": {
+      "key": "lock_closed",
+      "label": "Lock channel at closed switch",
+      "times": 0
+    },
+    "02": {
+      "key": "lock_opened",
+      "label": "Lock channel at opened switch",
+      "times": 0
+    },
+    "03": {
+      "key": "lock_timeout",
+      "label": "Lock channel (timeout)",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "04": {
+      "key": "lock_unlock_timeout",
+      "label": "Lock/unlock channel (timeout)",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "05": { "key": "unlock", "label": "Unlock channel", "times": 0 },
+    "06": {
+      "key": "disable_program_closed",
+      "label": "Disable channel program at closed switch",
+      "times": 0
+    },
+    "07": {
+      "key": "disable_program_opened",
+      "label": "Disable channel program at opened switch",
+      "times": 0
+    },
+    "08": {
+      "key": "disable_program_timeout",
+      "label": "Disable channel program (timeout)",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "09": {
+      "key": "disable_enable_program_timeout",
+      "label": "Disable/enable channel program (timeout)",
+      "times": 1,
+      "time_labels": ["Timeout"]
+    },
+    "0A": {
+      "key": "enable_program",
+      "label": "Enable channel program",
+      "times": 0
+    },
+    "0B": {
+      "key": "select_no_programs",
+      "label": "Select no programs",
+      "times": 0
+    },
+    "0C": {
+      "key": "select_summer",
+      "label": "Select summer programs",
+      "times": 0
+    },
+    "0D": {
+      "key": "select_winter",
+      "label": "Select winter programs",
+      "times": 0
+    },
+    "0E": {
+      "key": "select_holiday",
+      "label": "Select holiday programs",
+      "times": 0
+    },
+    "0F": {
+      "key": "enable_alarm_ss_closed",
+      "label": "Enable Alarm/Sunrise/Sunset at closed switch",
+      "times": 0
+    },
+    "10": {
+      "key": "enable_alarm_ss_opened",
+      "label": "Enable Alarm/Sunrise/Sunset at open switch",
+      "times": 0
+    },
+    "11": {
+      "key": "disable_alarm_ss_closed",
+      "label": "Disable Alarm/Sunrise/Sunset at closed switch",
+      "times": 0
+    },
+    "12": {
+      "key": "disable_alarm_ss_opened",
+      "label": "Disable Alarm/Sunrise/Sunset at open switch",
+      "times": 0
+    },
+    "13": {
+      "key": "enable_alarm_ss",
+      "label": "Enable Alarm/Sunrise/Sunset",
+      "times": 0
+    },
+    "14": {
+      "key": "toggle_alarm_ss",
+      "label": "Enable/Disable Alarm/Sunrise/Sunset",
+      "times": 0
+    },
+    "15": {
+      "key": "disable_alarm_ss",
+      "label": "Disable Alarm/Sunrise/Sunset",
+      "times": 0
+    }
+  }
+}

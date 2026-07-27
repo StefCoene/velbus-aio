@@ -48,6 +48,18 @@
     "FF": "ModuleType2Message"
   },
   "Memory": {
+    "ActionTable": {
+      "actions": "dimmer_v2",
+      "bank": "0068",
+      "channels": {
+        "01": {},
+        "02": {}
+      },
+      "layout": "shared",
+      "slot_count": 138,
+      "slot_size": 6,
+      "subject_encoding": "param3_low3"
+    },
     "Channels": {
       "01": "0000-000F",
       "02": "0010-001F"
