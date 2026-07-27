@@ -188,6 +188,9 @@ class Module:
         self.memory_map_version = memorymap
         self.build_year = build_year
         self.build_week = build_week
+        # Set when the module's firmware predates the memory map its spec
+        # describes. Home Assistant surfaces this, and writes are refused.
+        self._memory_map_outdated = False
         self._cache_dir = cache_dir
         self._is_loading = False
         self._got_status = asyncio.Event()
@@ -267,6 +270,8 @@ class Module:
                 elif isinstance(value, dict) and isinstance(self._data[key], dict):
                     self._data[key] = {**value, **self._data[key]}
 
+        self._check_memory_map_build()
+
         commandRegistry.register_module_commands(
             self._type, self._data.get("CommandToClass", {})
         )
@@ -274,6 +279,11 @@ class Module:
         # set some params from the velbus controller
         self._writer = writer
         self._memory = MemoryBackend(self._address, writer, self._log)
+        if self._memory_map_outdated:
+            self._memory.block_writes(
+                f"module build {self.get_build()} predates the memory map from "
+                f"build {self.get_memory_map_build()} that its spec describes"
+            )
         memory_spec = self._data.get("Memory", {})
         self._action_tables = build_action_tables(
             self._memory,
@@ -293,6 +303,56 @@ class Module:
         )
         for chan in self._channels.values():
             chan.set_writer(writer)
+
+    def get_build(self) -> str | None:
+        """Return the firmware build as "YYWW", or None when unknown."""
+        if self.build_year is None or self.build_week is None:
+            return None
+        return f"{self.build_year:02d}{self.build_week:02d}"
+
+    def get_memory_map_build(self) -> str | None:
+        """Return the build from which this spec's memory map applies."""
+        return self._data.get("MemoryMapBuild")
+
+    def is_memory_map_outdated(self) -> bool:
+        """Whether the module predates the memory map its spec describes.
+
+        When true the spec's addresses do not match this module's eeprom,
+        so its memory must not be written. Home Assistant surfaces this so
+        the mismatch is visible instead of silently corrupting data.
+        """
+        return self._memory_map_outdated
+
+    def _check_memory_map_build(self) -> None:
+        """Determine whether the module predates its spec's memory map.
+
+        Modules report their firmware build as year and week. The protocol
+        documents state the build from which each memory map applies, and
+        MemoryMapBuild records the one this spec was written against. A
+        module older than that runs an earlier layout, so every address in
+        the spec is suspect: reading a name or an action table returns
+        whatever else lives there, and writing destroys it.
+        """
+        self._memory_map_outdated = False
+        expected = self.get_memory_map_build()
+        reported = self.get_build()
+        if expected is None or reported is None:
+            return
+        # "YYWW", the same shape vlp_reader compares build numbers in.
+        if len(reported) != len(expected):
+            self._log.debug(f"Cannot compare build {reported} to {expected}")
+            return
+        if reported >= expected:
+            return
+
+        self._memory_map_outdated = True
+        self._log.warning(
+            f"Module {self._address} ({h2(self._type)}) reports build "
+            f"{reported}, but the module spec describes the memory map from "
+            f"build {expected} onwards. Memory addresses may be wrong; names "
+            f"and action tables read from this module can be incorrect, so "
+            f"writing to its memory is refused."
+        )
 
     def cleanupSubChannels(self) -> None:
         """Cleanup subchannels that are not defined."""
