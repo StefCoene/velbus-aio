@@ -8,10 +8,10 @@ disable-model-invocation: false
 
 When exposing Velbus parameters to Home Assistant, choose **exactly one** surface:
 
-| Surface | Criterion |
-| --- | --- |
-| **HA entity** | Controlled by regular Velbus messages — **no** writing to module internal memory |
-| **Config page** | Requires writing module internal memory (EEPROM) |
+| Surface         | Criterion                                                                        |
+| --------------- | -------------------------------------------------------------------------------- |
+| **HA entity**   | Controlled by regular Velbus messages — **no** writing to module internal memory |
+| **Config page** | Requires writing module internal memory (EEPROM)                                 |
 
 Do not expose the same write path on both surfaces.
 

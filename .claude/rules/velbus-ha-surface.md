@@ -9,9 +9,9 @@ paths:
 
 Canonical skill: `skills/velbus-ha-surface/SKILL.md`. Follow it when adding or reviewing anything exposed to Home Assistant.
 
-| Surface | Criterion |
-| --- | --- |
-| **HA entity** | Regular Velbus messages only — **no** internal memory (EEPROM) writes |
+| Surface         | Criterion                                                                                                |
+| --------------- | -------------------------------------------------------------------------------------------------------- |
+| **HA entity**   | Regular Velbus messages only — **no** internal memory (EEPROM) writes                                    |
 | **Config page** | Needs internal memory writing (`MemoryBackend`, `0xFC`/`0xCA`, action tables, EEPROM names/NO-NC/enable) |
 
 ## Rules
