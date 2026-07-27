@@ -19,7 +19,12 @@ if TYPE_CHECKING:
     from velbusaio.controller import Velbus as Controller
 
 from velbusaio import channels as channels_module, properties as properties_module
-from velbusaio.actions import ActionSlot, ActionTable, build_action_tables
+from velbusaio.actions import (
+    ActionSlot,
+    ActionTable,
+    build_action_tables,
+    reserved_ranges,
+)
 from velbusaio.channels import (
     Button,
     ButtonCounter,
@@ -269,10 +274,12 @@ class Module:
         # set some params from the velbus controller
         self._writer = writer
         self._memory = MemoryBackend(self._address, writer, self._log)
+        memory_spec = self._data.get("Memory", {})
         self._action_tables = build_action_tables(
             self._memory,
-            self._data.get("Memory", {}).get("ActionTable", {}),
+            memory_spec.get("ActionTable", {}),
             self._log,
+            reserved=reserved_ranges(memory_spec),
         )
         temp_chan: int | None = None
         if "TemperatureChannel" in self._data:
