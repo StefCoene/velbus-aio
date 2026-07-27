@@ -180,6 +180,7 @@
     },
     "ModuleName": "06C0-06FF"
   },
+  "MemoryMapBuild": "2320",
   "Properties": {
     "selected_program": {
       "Name": "Selected program",

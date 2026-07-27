@@ -74,6 +74,7 @@
     },
     "ModuleName": "00E0-00EF;01E0-01EF;02E0-02EF;03E0-03EF"
   },
+  "MemoryMapBuild": "1915",
   "Type": "VMB4DC",
   "sliderScale": 100
 }

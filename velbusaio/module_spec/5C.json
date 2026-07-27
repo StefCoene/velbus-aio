@@ -150,6 +150,7 @@
     },
     "ModuleName": "0678-06B7"
   },
+  "MemoryMapBuild": "2320",
   "Properties": {
     "light_value": {
       "Name": "Light value",
