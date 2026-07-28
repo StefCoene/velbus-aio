@@ -26,6 +26,9 @@ class ConfigParameter:
     max_value: float | None = None
     max_length: int | None = None
     channel: int | None = None
+    # Heading to file this parameter under, matching how VelbusLink groups the
+    # same settings. None means it belongs with the module's general settings.
+    group: str | None = None
     entity_category: str = "config"
     # False = config-panel only; do not expose as a Home Assistant entity.
     entity: bool = True
@@ -75,6 +78,7 @@ class ConfigParameter:
             "max": self.max_value,
             "max_length": self.max_length,
             "channel": self.channel,
+            "group": self.group,
             "entity_category": self.entity_category,
             "entity": self.entity,
             "writes_memory": self.writes_memory,
