@@ -64,6 +64,11 @@ _FIELD_PART: Final[dict[str, int]] = {
     **dict.fromkeys(_PART4_FIELDS, 4),
 }
 
+# Settings that steer a thermostat rather than describe the sensor.
+_THERMOSTAT_ONLY: Final = frozenset(
+    {"temp_difference", "hysteresis", "default_sleep_timer"}
+)
+
 # CONFIG numbers for HA: thermostat presets are already on the climate entity.
 _CONFIG_NUMBER_SPECS: Final[tuple[tuple[str, str, float, float], ...]] = (
     ("temp_difference", "Boost difference", -10.0, 10.0),
@@ -84,6 +89,7 @@ class TemperatureSettings:
     has_part2: bool = True
     has_part3: bool = True
     has_part4: bool = True
+    has_thermostat: bool = True
     channel: int | None = None
     logger: logging.Logger | None = None
     timeout: float = _DEFAULT_TIMEOUT
@@ -289,6 +295,8 @@ class TemperatureSettings:
             part = _FIELD_PART[key]
             if part == 2 and not self.has_part2:
                 continue
+            if key in _THERMOSTAT_ONLY and not self.has_thermostat:
+                continue
             params.append(
                 ConfigParameter(
                     key=key,
@@ -333,6 +341,19 @@ class TemperatureSettings:
         return setter
 
 
+def module_has_thermostat(module_data: dict[str, Any]) -> bool:
+    """Return True when the module can regulate temperature, not just measure it.
+
+    A VMBPIRO carries a temperature sensor but no thermostat, so the settings
+    that steer one -- the boost difference, the hysteresis, the sleep timer --
+    mean nothing on it.
+    """
+    return any(
+        channel.get("Type") == "ThermostatChannel"
+        for channel in (module_data.get("Channels") or {}).values()
+    )
+
+
 def module_supports_temp_settings(module_data: dict[str, Any]) -> bool:
     """Return True when the module advertises temperature settings commands."""
     cmds = module_data.get("CommandToClass", {})
@@ -373,6 +394,7 @@ def build_temperature_settings(
         has_part2=cmds.get("E9") == "TempSensorSettingsPart2",
         has_part3=cmds.get("C6") == "TempSensorSettingsPart3",
         has_part4=cmds.get("B9") == "TempSensorSettingsPart4",
+        has_thermostat=module_has_thermostat(module_data),
         channel=channel,
         logger=logger,
     )
