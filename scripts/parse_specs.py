@@ -48,6 +48,7 @@ _KNOWN_MEMORY_KEYS = frozenset(
     {
         "Address",
         "ActionTable",
+        "AutosendInterval",
         "ChannelEnable",
         "Channels",
         "Extras",

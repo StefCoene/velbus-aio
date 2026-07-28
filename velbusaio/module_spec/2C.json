@@ -76,8 +76,8 @@
   },
   "Memory": {
     "AutosendInterval": {
-      "temperature": "00F3",
-      "light": "00F4"
+      "light": "00F4",
+      "temperature": "00F3"
     },
     "Channels": {
       "09": "0080-008F"

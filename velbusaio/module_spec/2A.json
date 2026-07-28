@@ -51,8 +51,8 @@
   },
   "Memory": {
     "AutosendInterval": {
-      "temperature": "00F3",
-      "light": "00F4"
+      "light": "00F4",
+      "temperature": "00F3"
     },
     "ModuleName": "00B0-00EF"
   },
