@@ -1043,13 +1043,24 @@ class Module:
                     type(err).__name__,
                 )
 
+    def supports_temperature(self) -> bool:
+        """Whether the module has a temperature sensor at all."""
+        return "TemperatureChannel" in self._data
+
     def get_temp_autosend_interval(self) -> int | None:
         """Return the temperature auto send interval byte, if it is known.
 
         Most modules report it in temperature settings Part2. The PIR modules
         answer no settings request at all and hold the value in eeprom, so fall
         back to what was read from there.
+
+        A module without a temperature sensor has nothing to report, and the
+        eeprom byte its protocol reserves for this reads 0xFF -- never written.
+        Taking that at face value would advertise an interval of 255 seconds
+        for a sensor that does not exist.
         """
+        if not self.supports_temperature():
+            return None
         settings = self._temp_settings
         if settings is not None and settings.is_loaded():
             value = settings.get("autosend_interval")

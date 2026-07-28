@@ -22,7 +22,8 @@ def module_fixture() -> Module:
     """Return a VMBPIRO with a stubbed memory backend."""
     module = Module(83, 0x2C)
     module._data = {
-        "Memory": {"AutosendInterval": {"temperature": "00F3", "light": "00F4"}}
+        "TemperatureChannel": "09",
+        "Memory": {"AutosendInterval": {"temperature": "00F3", "light": "00F4"}},
     }
     module._memory = Mock()
     module._memory.read_byte = AsyncMock(return_value=60)
@@ -115,4 +116,15 @@ class TestTempAutosendInterval:
 
     def test_nothing_known(self, module: Module) -> None:
         """Unknown is None, which is not the same as an interval of zero."""
+        assert module.get_temp_autosend_interval() is None
+
+    def test_module_without_a_temperature_sensor(self, module: Module) -> None:
+        """A VMBPIRM reserves the byte but never writes it, so it reads 0xFF.
+
+        Reporting that as an interval of 255 seconds would advertise a setting
+        for a sensor the module does not have.
+        """
+        del module._data["TemperatureChannel"]
+        module._memory.get_cached.return_value = 0xFF
+
         assert module.get_temp_autosend_interval() is None
