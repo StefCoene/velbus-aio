@@ -219,9 +219,15 @@ class TemperatureSettings:
             return self.values
 
     async def ensure_loaded(self) -> None:
-        """Load settings once if not already complete."""
+        """Load settings once if not already complete.
+
+        Not forced: several callers can ask at the same moment, all see an
+        empty cache, and all queue on the lock. Forcing would make each of
+        them wipe what the previous one just loaded and request it again,
+        replacing the futures the earlier request was still waiting on.
+        """
         if not self.is_loaded():
-            await self.refresh(force=True)
+            await self.refresh(force=False)
 
     async def set_value(self, key: str, value: Any) -> None:
         """Update one setting and write the owning Part frame to the bus."""
