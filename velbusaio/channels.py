@@ -885,7 +885,7 @@ class Temperature(Channel):
             params.append(
                 ConfigParameter(
                     key="autosend_interval",
-                    label="Autosend interval",
+                    label="Temperature autosend interval",
                     kind="number",
                     getter=self._get_autosend_interval,
                     setter=self._set_autosend_interval,

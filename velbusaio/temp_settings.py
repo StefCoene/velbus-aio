@@ -74,7 +74,7 @@ _CONFIG_NUMBER_SPECS: Final[tuple[tuple[str, str, float, float], ...]] = (
     ("temp_difference", "Boost difference", -10.0, 10.0),
     ("hysteresis", "Hysteresis", 0.0, 15.5),
     ("default_sleep_timer", "Default sleep", 1.0, 65279.0),
-    ("autosend_interval", "Autosend interval", 0.0, 255.0),
+    ("autosend_interval", "Temperature autosend interval", 0.0, 255.0),
 )
 
 
