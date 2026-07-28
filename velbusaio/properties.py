@@ -9,6 +9,7 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING
 
 from velbusaio.autosend import (
+    AUTOSEND_HINT,
     AUTOSEND_INTERVAL_MAX,
     AUTOSEND_NO_CHANGE,
     decode_autosend_interval,
@@ -199,7 +200,7 @@ class LightValue(Property):
                 channel=self.get_channel_number(),
                 # Command AA goes on the bus; nothing is written to eeprom.
                 writes_memory=False,
-                metadata={"unit": "s"},
+                metadata={"unit": "s", "hint": AUTOSEND_HINT},
             )
         ]
 

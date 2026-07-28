@@ -8,6 +8,7 @@ from dataclasses import KW_ONLY, dataclass, field
 import logging
 from typing import Any, Final
 
+from velbusaio.autosend import AUTOSEND_HINT
 from velbusaio.config import ConfigParameter
 from velbusaio.exceptions import VelbusConfigError, VelbusMemoryTimeout
 from velbusaio.message import Message
@@ -301,7 +302,12 @@ class TemperatureSettings:
                             else "s"
                             if key == "autosend_interval"
                             else "°C"
-                        )
+                        ),
+                        **(
+                            {"hint": AUTOSEND_HINT}
+                            if key == "autosend_interval"
+                            else {}
+                        ),
                     },
                 )
             )

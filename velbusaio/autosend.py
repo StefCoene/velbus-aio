@@ -23,6 +23,13 @@ AUTOSEND_INTERVAL_MAX: Final = 255
 AutosendMode = Literal["never", "on_change", "interval"]
 AUTOSEND_MODES: Final = ("never", "on_change", "interval")
 
+# The byte is not a plain number of seconds, so anything offering it for
+# editing has to say what the low values mean.
+AUTOSEND_HINT: Final = (
+    "0 keeps the current setting, 1-4 turns it off, 5-9 sends on every change, "
+    "10-255 is a fixed interval in seconds"
+)
+
 
 def encode_autosend_interval(mode: str, seconds: int | None = None) -> int:
     """Return the interval byte that puts a module in the requested mode."""
