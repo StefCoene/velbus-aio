@@ -162,8 +162,12 @@ class TestTempSensorSettingsRequest:
     """Tests for TempSensorSettingsRequest."""
 
     def test_data_to_binary(self):
-        """Test Data to binary."""
-        assert TempSensorSettingsRequest().data_to_binary() == bytes([0xE7])
+        """The protocol specifies two data bytes, the second a "don't care".
+
+        A module compares the data length and ignores a frame that does not
+        match, so a one byte request is never answered.
+        """
+        assert TempSensorSettingsRequest().data_to_binary() == bytes([0xE7, 0x00])
 
 
 class TestTempSensorSettingsParts:
