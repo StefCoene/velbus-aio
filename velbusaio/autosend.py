@@ -66,3 +66,8 @@ def decode_autosend_interval(value: int) -> tuple[str, int | None]:
     if value < AUTOSEND_INTERVAL_MIN:
         return "on_change", None
     return "interval", value
+
+
+# The sensor values a module can be told to report on its own. Which of them a
+# module actually has is declared per type in Memory.AutosendInterval.
+AUTOSEND_KINDS: Final = ("temperature", "light", "counter")

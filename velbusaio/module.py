@@ -20,7 +20,12 @@ if TYPE_CHECKING:
 
 from velbusaio import channels as channels_module, properties as properties_module
 from velbusaio.actions import ActionSlot, ActionTable, build_action_tables
-from velbusaio.autosend import AUTOSEND_HINT, AUTOSEND_INTERVAL_MAX, AUTOSEND_NO_CHANGE
+from velbusaio.autosend import (
+    AUTOSEND_HINT,
+    AUTOSEND_INTERVAL_MAX,
+    AUTOSEND_KINDS,
+    AUTOSEND_NO_CHANGE,
+)
 from velbusaio.channels import (
     Button,
     ButtonCounter,
@@ -1011,6 +1016,10 @@ class Module:
         """List all properties for this module."""
         return self._properties
 
+    def get_autosend_kinds(self) -> list[str]:
+        """Return the auto send intervals this module keeps in its memory."""
+        return [kind for kind in AUTOSEND_KINDS if self.get_autosend_address(kind)]
+
     def get_autosend_address(self, kind: str) -> int | None:
         """Return the eeprom address holding an auto send interval, if declared.
 
@@ -1030,7 +1039,7 @@ class Module:
         """
         if self._memory is None:
             return
-        for kind in ("temperature", "light", "counter"):
+        for kind in self.get_autosend_kinds():
             address = self.get_autosend_address(kind)
             if address is None:
                 continue
