@@ -9,6 +9,7 @@ import pytest
 from velbusaio.channels import Temperature
 from velbusaio.command_registry import commandRegistry
 from velbusaio.exceptions import VelbusConfigError
+from velbusaio.temp_settings import build_temperature_settings, module_has_thermostat
 
 # 0x2C is the VMBPIRO: it maps command E5 but never sends settings Part2.
 VMBPIRO = 0x2C
@@ -110,3 +111,54 @@ class TestReadWrite:
         with pytest.raises(VelbusConfigError, match="does not support"):
             await param.set_value(30)
         mock_writer.assert_not_awaited()
+
+
+class TestThermostatOnlySettings:
+    """Test cases for hiding settings a module cannot use."""
+
+    @pytest.fixture(name="spec")
+    def spec_fixture(self) -> dict:
+        """Return a spec with a temperature sensor and settings support."""
+        return {
+            "TemperatureChannel": "09",
+            "CommandToClass": {
+                "E7": "TempSensorSettingsRequest",
+                "E8": "TempSensorSettingsPart1",
+                "E9": "TempSensorSettingsPart2",
+            },
+            "Channels": {"09": {"Type": "Temperature"}},
+        }
+
+    def test_sensor_without_thermostat(self, spec: dict, mock_writer) -> None:
+        """A VMBPIRO measures but does not regulate, so no boost or hysteresis."""
+        settings = build_temperature_settings(83, mock_writer, spec, channel=9)
+
+        assert settings is not None
+        assert [param.key for param in settings.get_config_parameters()] == [
+            "autosend_interval"
+        ]
+
+    def test_module_with_a_thermostat(self, spec: dict, mock_writer) -> None:
+        """A VMBGP4 regulates, so those settings do apply."""
+        spec["Channels"]["10"] = {"Type": "ThermostatChannel"}
+
+        settings = build_temperature_settings(54, mock_writer, spec, channel=10)
+
+        assert [param.key for param in settings.get_config_parameters()] == [
+            "temp_difference",
+            "hysteresis",
+            "default_sleep_timer",
+            "autosend_interval",
+        ]
+
+    @pytest.mark.parametrize(
+        ("channels", "expected"),
+        [
+            ({"01": {"Type": "Sensor"}, "09": {"Type": "Temperature"}}, False),
+            ({"10": {"Type": "ThermostatChannel"}}, True),
+            ({}, False),
+        ],
+    )
+    def test_detection(self, channels: dict, expected: bool) -> None:
+        """The thermostat is recognised by its channel type in the spec."""
+        assert module_has_thermostat({"Channels": channels}) is expected
