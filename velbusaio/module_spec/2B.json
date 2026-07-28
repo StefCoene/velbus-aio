@@ -49,6 +49,10 @@
     "FF": "ModuleTypeMessage"
   },
   "Memory": {
+    "AutosendInterval": {
+      "temperature": "00F3",
+      "light": "00F4"
+    },
     "ModuleName": "00B0-00EF"
   },
   "Properties": {

@@ -30,6 +30,7 @@ from velbusaio.channels import (
 from velbusaio.command_registry import commandRegistry
 from velbusaio.config import ConfigParameter, decode_name, encode_name
 from velbusaio.const import PRIORITY_LOW, SCAN_MODULEINFO_TIMEOUT_INITIAL
+from velbusaio.exceptions import VelbusException
 from velbusaio.helpers import h2, handle_match, keys_exists
 from velbusaio.memory import MemoryBackend, join_address
 from velbusaio.message import Message
@@ -1008,6 +1009,56 @@ class Module:
     def get_properties(self) -> dict[str, Property]:
         """List all properties for this module."""
         return self._properties
+
+    def get_autosend_address(self, kind: str) -> int | None:
+        """Return the eeprom address holding an auto send interval, if declared.
+
+        The PIR modules keep these intervals in memory instead of reporting
+        them in a settings message, and the address is documented per module
+        type, so it comes from the spec rather than from here.
+        """
+        spec = (self._data.get("Memory") or {}).get("AutosendInterval") or {}
+        address = spec.get(kind)
+        return int(address, 16) if address else None
+
+    async def refresh_autosend_intervals(self, *, use_cache: bool = True) -> None:
+        """Read the auto send intervals that only exist in module memory.
+
+        Silent on failure: a module that does not answer leaves the interval
+        unknown, which reads the same as never having asked.
+        """
+        if self._memory is None:
+            return
+        for kind in ("temperature", "light"):
+            address = self.get_autosend_address(kind)
+            if address is None:
+                continue
+            try:
+                await self._memory.read_byte(address, use_cache=use_cache)
+            except (OSError, RuntimeError, VelbusException) as err:
+                logging.getLogger("velbus-module").debug(
+                    "Could not read the %s auto send interval at %s: %s",
+                    kind,
+                    h2(address),
+                    type(err).__name__,
+                )
+
+    def get_temp_autosend_interval(self) -> int | None:
+        """Return the temperature auto send interval byte, if it is known.
+
+        Most modules report it in temperature settings Part2. The PIR modules
+        answer no settings request at all and hold the value in eeprom, so fall
+        back to what was read from there.
+        """
+        settings = self._temp_settings
+        if settings is not None and settings.is_loaded():
+            value = settings.get("autosend_interval")
+            if value is not None:
+                return int(value)
+        address = self.get_autosend_address("temperature")
+        if address is None or self._memory is None:
+            return None
+        return self._memory.get_cached(address)
 
     def get_config_parameters(self) -> list[ConfigParameter]:
         """List every configuration parameter this module exposes.

@@ -67,6 +67,10 @@
     "F9": "VeryFastBlinkingLedMessage"
   },
   "Memory": {
+    "AutosendInterval": {
+      "temperature": "00F3",
+      "light": "00F4"
+    },
     "Channels": {
       "09": "0080-008F"
     },
