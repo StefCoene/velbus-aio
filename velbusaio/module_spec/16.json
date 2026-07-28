@@ -110,6 +110,7 @@
     },
     "ModuleName": "03C0-03FF"
   },
+  "MemoryMapBuild": "1409",
   "Properties": {
     "selected_program": {
       "Name": "Selected program",

@@ -40,6 +40,7 @@
       "01": "00F0-00FF"
     }
   },
+  "MemoryMapBuild": "1233",
   "TemperatureChannel": "01",
   "Thermostat": "yes",
   "Type": "VMB1TS"

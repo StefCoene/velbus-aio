@@ -50,6 +50,7 @@
     },
     "ModuleName": "004C-008B"
   },
+  "MemoryMapBuild": "1935",
   "Properties": {
     "selected_program": {
       "Name": "Selected program",

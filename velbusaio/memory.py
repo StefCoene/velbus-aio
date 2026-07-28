@@ -13,7 +13,7 @@ import struct
 from typing import Final
 
 from velbusaio.const import PRIORITY_LOW, SLEEP_TIME
-from velbusaio.exceptions import VelbusMemoryTimeout
+from velbusaio.exceptions import VelbusMemoryTimeout, VelbusMemoryWriteBlocked
 from velbusaio.message import Message
 from velbusaio.messages.memory_data import MemoryDataMessage
 from velbusaio.messages.memory_data_block import MemoryDataBlockMessage
@@ -61,6 +61,20 @@ class MemoryBackend:
         self._cache: dict[int, int] = {}
         self._waiters: dict[int, asyncio.Future[bytes]] = {}
         self._lock = asyncio.Lock()
+        self._write_blocked_reason: str | None = None
+
+    def block_writes(self, reason: str) -> None:
+        """Refuse every further write, because they would corrupt memory."""
+        self._write_blocked_reason = reason
+
+    @property
+    def writes_blocked(self) -> bool:
+        """Whether writing to this module's memory is refused."""
+        return self._write_blocked_reason is not None
+
+    def _assert_writable(self) -> None:
+        if self._write_blocked_reason is not None:
+            raise VelbusMemoryWriteBlocked(self._write_blocked_reason)
 
     @property
     def cache(self) -> dict[int, int]:
@@ -158,12 +172,14 @@ class MemoryBackend:
 
     async def write_byte(self, address: int, value: int) -> None:
         """Write one memory byte and wait for the 0xFE acknowledgement."""
+        self._assert_writable()
         async with self._lock:
             await self._write_byte_unlocked(address, value & 0xFF)
             await asyncio.sleep(_WRITE_BYTE_GAP)
 
     async def write_bytes(self, start: int, data: bytes) -> None:
         """Write a contiguous memory range using 4-byte blocks when possible."""
+        self._assert_writable()
         if not data:
             return
         async with self._lock:

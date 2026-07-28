@@ -332,6 +332,7 @@
     },
     "ModuleName": "0FA8-0FE7"
   },
+  "MemoryMapBuild": "2320",
   "Properties": {
     "memo_text": {
       "Name": "Memo Text",

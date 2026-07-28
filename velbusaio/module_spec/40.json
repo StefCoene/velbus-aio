@@ -14,5 +14,6 @@
   "Memory": {
     "ModuleName": "0000-003F"
   },
+  "MemoryMapBuild": "1948",
   "Type": "VMBUSBIP"
 }

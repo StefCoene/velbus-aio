@@ -367,6 +367,7 @@
     },
     "ModuleName": "09BE-09FD"
   },
+  "MemoryMapBuild": "1803",
   "Properties": {
     "memo_text": {
       "Name": "Memo Text",

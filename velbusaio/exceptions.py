@@ -40,6 +40,21 @@ class VelbusMemoryTimeout(VelbusException):
         )
 
 
+class VelbusMemoryWriteBlocked(VelbusException):
+    """Exception when writing to a module's memory would corrupt it.
+
+    A module running firmware older than the memory map its spec describes
+    lays its eeprom out differently, so every address in the spec is
+    suspect. Reading returns unrelated bytes; writing destroys whatever
+    really lives at that address.
+    """
+
+    def __init__(self, reason: str) -> None:
+        """Initialize the exception."""
+        super().__init__(f"Refusing to write to memory: {reason}")
+        self.reason = reason
+
+
 class VelbusConfigError(VelbusException):
     """Exception for configuration / action-table errors."""
 
