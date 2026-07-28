@@ -8,8 +8,16 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING
 
+from velbusaio.autosend import (
+    AUTOSEND_INTERVAL_MAX,
+    AUTOSEND_NO_CHANGE,
+    decode_autosend_interval,
+    encode_autosend_interval,
+)
 from velbusaio.baseItem import BaseItem
 from velbusaio.command_registry import commandRegistry
+from velbusaio.config import ConfigParameter
+from velbusaio.exceptions import VelbusConfigError
 from velbusaio.message import Message
 from velbusaio.messages.module_status import PROGRAM_SELECTION
 
@@ -148,10 +156,67 @@ class LightValue(Property):
         """Initialize light value property with per-instance current value."""
         super().__init__(module, name, writer)
         self._cur: float = 0.0
+        self._send_interval: int = AUTOSEND_NO_CHANGE
 
     def get_state(self) -> float:
         """Return the current light sensor value."""
         return round(self._cur, 2)
+
+    def get_autosend_interval(self) -> int:
+        """Return the interval byte the module last reported.
+
+        Only the PIR status messages carry it; on a module that reports its
+        light value through a plain module status this stays 0 ("unknown").
+        """
+        return self._send_interval
+
+    def get_autosend(self) -> tuple[str, int | None]:
+        """Return the (mode, seconds) the module last reported."""
+        return decode_autosend_interval(self._send_interval)
+
+    async def set_autosend(self, mode: str, seconds: int | None = None) -> None:
+        """Configure how often the module sends its light value on the bus.
+
+        :param mode: one of ``"never"`` (auto send disabled), ``"on_change"``
+            (auto send on every change) or ``"interval"`` (a fixed interval,
+            requires ``seconds``).
+        :param seconds: the interval in seconds (10..255), only used and
+            required when ``mode`` is ``"interval"``.
+        """
+        await self._write_interval(encode_autosend_interval(mode, seconds))
+
+    def get_config_parameters(self) -> list[ConfigParameter]:
+        """Return the auto send interval as a discoverable CONFIG parameter."""
+        return [
+            ConfigParameter(
+                key="light_autosend_interval",
+                label="Light value autosend interval (s)",
+                kind="number",
+                getter=self._get_interval,
+                setter=self._set_interval,
+                min_value=float(AUTOSEND_NO_CHANGE),
+                max_value=float(AUTOSEND_INTERVAL_MAX),
+            )
+        ]
+
+    async def _get_interval(self) -> int:
+        return self._send_interval
+
+    async def _set_interval(self, value: float) -> None:
+        """Write a raw interval byte, the way the temperature settings do."""
+        await self._write_interval(int(value))
+
+    async def _write_interval(self, interval: int) -> None:
+        cls = commandRegistry.get_command(0xAA, self._module.get_type())
+        if cls is None:
+            raise VelbusConfigError(
+                f"Module type {self._module.get_type():#04x} does not support "
+                "setting the light value autosend interval"
+            )
+        msg = cls(self.get_module_address(), interval)
+        await self._writer(msg)
+        # The module does not confirm the new setting, it just starts using it.
+        await self.update({"send_interval": interval})
 
 
 class BusErrorTx(Property):

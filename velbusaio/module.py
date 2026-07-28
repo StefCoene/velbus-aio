@@ -797,7 +797,13 @@ class Module:
 
     async def _handle_module_status_pir(self, message: ModuleStatusPirMessage) -> None:
         """Handle PIR module status messages."""
-        await self._update_property("light_value", {"cur": message.light_value})
+        await self._update_property(
+            "light_value",
+            {
+                "cur": message.light_value,
+                "send_interval": message.light_value_send_interval,
+            },
+        )
         await self._update_channel(1, {"closed": message.dark})
         await self._update_channel(2, {"closed": message.light})
         await self._update_channel(3, {"closed": message.motion1})
@@ -817,7 +823,13 @@ class Module:
         self, message: ModuleStatusGP4PirMessage, channel_offset: int
     ) -> None:
         """Handle GP4 PIR module status messages."""
-        await self._update_property("light_value", {"cur": message.light_value})
+        await self._update_property(
+            "light_value",
+            {
+                "cur": message.light_value,
+                "send_interval": message.light_value_send_interval,
+            },
+        )
         for channel_id in range(1, 9):
             channel = self._translate_channel_name(channel_id + channel_offset)
             await self._update_channel(

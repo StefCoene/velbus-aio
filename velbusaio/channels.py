@@ -11,6 +11,7 @@ import math
 import string
 from typing import TYPE_CHECKING, Any
 
+from velbusaio.autosend import encode_autosend_interval
 from velbusaio.baseItem import BaseItem
 from velbusaio.command_registry import commandRegistry
 from velbusaio.config import ConfigParameter
@@ -27,12 +28,6 @@ from velbusaio.messages.edge_set_color import (
     CustomColorPriority,
     SetCustomColorMessage,
     SetEdgeColorMessage,
-)
-from velbusaio.messages.sensor_temp_request import (
-    TEMP_AUTOSEND_DISABLED,
-    TEMP_AUTOSEND_INTERVAL_MAX,
-    TEMP_AUTOSEND_INTERVAL_MIN,
-    TEMP_AUTOSEND_ON_CHANGE,
 )
 
 if TYPE_CHECKING:
@@ -830,25 +825,13 @@ class Temperature(Channel):
         :param seconds: the interval in seconds (10..255), only used and
             required when ``mode`` is ``"interval"``.
         """
-        if mode == "never":
-            interval = TEMP_AUTOSEND_DISABLED
-        elif mode == "on_change":
-            interval = TEMP_AUTOSEND_ON_CHANGE
-        elif mode == "interval":
-            if seconds is None:
-                raise ValueError("seconds is required when mode is 'interval'")
-            if not TEMP_AUTOSEND_INTERVAL_MIN <= seconds <= TEMP_AUTOSEND_INTERVAL_MAX:
-                raise ValueError(
-                    "seconds must be between "
-                    f"{TEMP_AUTOSEND_INTERVAL_MIN} and {TEMP_AUTOSEND_INTERVAL_MAX}"
-                )
-            interval = seconds
-        else:
-            raise ValueError(
-                f"Unknown temperature autosend mode: {mode!r} "
-                "(expected 'never', 'on_change' or 'interval')"
-            )
+        interval = encode_autosend_interval(mode, seconds)
         cls = commandRegistry.get_command(0xE5, self._module.get_type())
+        if cls is None:
+            raise VelbusConfigError(
+                f"Module type {self._module.get_type():#04x} does not support "
+                "setting the temperature autosend interval"
+            )
         msg = cls(self._address, interval)
         await self._writer(msg)
 

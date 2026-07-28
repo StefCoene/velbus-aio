@@ -76,6 +76,7 @@ class ModuleStatusPirMessage(DeclarativeMessage):
         default=PROGRAM_SELECTION[0],
         serializable=False,
     )
+    light_value_send_interval = ByteField(6, default=0)  # data[6]
 
 
 @register(COMMAND_CODE)
