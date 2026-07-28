@@ -64,10 +64,12 @@ _FIELD_PART: Final[dict[str, int]] = {
     **dict.fromkeys(_PART4_FIELDS, 4),
 }
 
-# Settings that steer a thermostat rather than describe the sensor.
+# Settings that steer a thermostat rather than describe the sensor. VelbusLink
+# files these under "Adjustments", so use the heading its users already know.
 _THERMOSTAT_ONLY: Final = frozenset(
     {"temp_difference", "hysteresis", "default_sleep_timer"}
 )
+_THERMOSTAT_GROUP: Final = "Adjustments"
 
 # CONFIG numbers for HA: thermostat presets are already on the climate entity.
 _CONFIG_NUMBER_SPECS: Final[tuple[tuple[str, str, float, float], ...]] = (
@@ -301,6 +303,7 @@ class TemperatureSettings:
                     min_value=min_value,
                     max_value=max_value,
                     channel=self.channel,
+                    group=(_THERMOSTAT_GROUP if key in _THERMOSTAT_ONLY else None),
                     # Settings go out as a Part1-4 message, not an eeprom write.
                     writes_memory=False,
                     metadata={
