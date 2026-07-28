@@ -11,7 +11,12 @@ import math
 import string
 from typing import TYPE_CHECKING, Any
 
-from velbusaio.autosend import encode_autosend_interval
+from velbusaio.autosend import (
+    AUTOSEND_HINT,
+    AUTOSEND_INTERVAL_MAX,
+    AUTOSEND_NO_CHANGE,
+    encode_autosend_interval,
+)
 from velbusaio.baseItem import BaseItem
 from velbusaio.command_registry import commandRegistry
 from velbusaio.config import ConfigParameter
@@ -872,9 +877,42 @@ class Temperature(Channel):
     def get_config_parameters(self) -> list[ConfigParameter]:
         """Return discoverable CONFIG parameters for temperature presets."""
         settings = self.get_temp_settings()
-        if settings is None:
-            return []
-        return settings.get_config_parameters()
+        params = [] if settings is None else settings.get_config_parameters()
+        if not any(param.key == "autosend_interval" for param in params):
+            # The PIR modules never send settings Part2, so the interval is not
+            # among those parameters, but command E5 still sets it and the
+            # module keeps the value where it can be read back from.
+            params.append(
+                ConfigParameter(
+                    key="autosend_interval",
+                    label="Autosend interval",
+                    kind="number",
+                    getter=self._get_autosend_interval,
+                    setter=self._set_autosend_interval,
+                    min_value=float(AUTOSEND_NO_CHANGE),
+                    max_value=float(AUTOSEND_INTERVAL_MAX),
+                    channel=self._num,
+                    writes_memory=False,
+                    metadata={"unit": "s", "hint": AUTOSEND_HINT},
+                )
+            )
+        return params
+
+    async def _get_autosend_interval(self) -> int | None:
+        return self._module.get_temp_autosend_interval()
+
+    async def _set_autosend_interval(self, value: float) -> None:
+        """Send command E5 with a raw interval byte, then read back the result."""
+        interval = int(value)
+        cls = commandRegistry.get_command(0xE5, self._module.get_type())
+        if cls is None:
+            raise VelbusConfigError(
+                f"Module type {self._module.get_type():#04x} does not support "
+                "setting the temperature autosend interval"
+            )
+        await self._writer(cls(self._address, interval))
+        # The module confirms nothing, so go and look at what it now holds.
+        await self._module.refresh_autosend_intervals(use_cache=False)
 
     async def _switch_mode(self) -> None:
         """Switch the climate mode."""
