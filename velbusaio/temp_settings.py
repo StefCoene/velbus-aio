@@ -292,6 +292,8 @@ class TemperatureSettings:
                     min_value=min_value,
                     max_value=max_value,
                     channel=self.channel,
+                    # Settings go out as a Part1-4 message, not an eeprom write.
+                    writes_memory=False,
                     metadata={
                         "unit": (
                             "min"

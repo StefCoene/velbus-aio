@@ -1114,6 +1114,8 @@ class Relay(Channel):
                     getter=self._get_inhibit_value,
                     setter=self.set_inhibit,
                     channel=self._num,
+                    # Sent as a bus command; nothing is written to eeprom.
+                    writes_memory=False,
                 )
             )
         if self.supports_forced_on():
@@ -1125,6 +1127,8 @@ class Relay(Channel):
                     getter=self._get_forced_on_value,
                     setter=self.set_forced_on,
                     channel=self._num,
+                    # Sent as a bus command; nothing is written to eeprom.
+                    writes_memory=False,
                 )
             )
         if self.supports_forced_off():
@@ -1136,6 +1140,8 @@ class Relay(Channel):
                     getter=self._get_forced_off_value,
                     setter=self.set_forced_off,
                     channel=self._num,
+                    # Sent as a bus command; nothing is written to eeprom.
+                    writes_memory=False,
                 )
             )
         table = self.get_action_table()

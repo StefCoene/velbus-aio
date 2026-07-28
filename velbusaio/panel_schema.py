@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import importlib.resources
 import json
 from typing import TYPE_CHECKING, Any
@@ -199,6 +200,32 @@ def get_module_type_schema(type_id: int) -> dict[str, Any]:
     }
 
 
+async def _config_entries(module: Module) -> list[dict[str, Any]]:
+    """Return every configuration parameter of a module with its live value.
+
+    Only the parameters that do not write eeprom are listed. The ones that do
+    -- the channel name, whether a channel is enabled, the NO/NC contact --
+    already have a section of their own, and reading them back costs a memory
+    read per channel.
+
+    Reading a value can put a request on the bus and time out on a module that
+    does not answer. One silent parameter must not cost the whole page, so a
+    failed read leaves the value None and the panel shows it as unknown.
+    """
+    params = [
+        param for param in module.get_config_parameters() if not param.writes_memory
+    ]
+    values = await asyncio.gather(
+        *(param.get_value() for param in params), return_exceptions=True
+    )
+    entries: list[dict[str, Any]] = []
+    for param, value in zip(params, values, strict=True):
+        entry = param.to_dict()
+        entry["value"] = None if isinstance(value, BaseException) else value
+        entries.append(entry)
+    return entries
+
+
 async def get_module_instance_data(module: Module) -> dict[str, Any]:
     """Return live module values for the config panel."""
     channels = module.get_channels()
@@ -224,6 +251,8 @@ async def get_module_instance_data(module: Module) -> dict[str, Any]:
                 entry["contact"] = "NC" if normal_closed else "NO"
         channel_data[str(channel_num)] = entry
 
+    config = await _config_entries(module)
+
     properties: dict[str, Any] = {}
     for key, prop in module.get_properties().items():
         if hasattr(prop, "get_selected_program"):
@@ -240,4 +269,5 @@ async def get_module_instance_data(module: Module) -> dict[str, Any]:
         "sw_version": module.get_sw_version(),
         "channels": channel_data,
         "properties": properties,
+        "config": config,
     }

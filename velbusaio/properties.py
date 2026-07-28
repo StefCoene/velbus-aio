@@ -196,6 +196,10 @@ class LightValue(Property):
                 setter=self._set_interval,
                 min_value=float(AUTOSEND_NO_CHANGE),
                 max_value=float(AUTOSEND_INTERVAL_MAX),
+                channel=self.get_channel_number(),
+                # Command AA goes on the bus; nothing is written to eeprom.
+                writes_memory=False,
+                metadata={"unit": "s"},
             )
         ]
 

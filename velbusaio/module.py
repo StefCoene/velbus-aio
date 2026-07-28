@@ -28,7 +28,7 @@ from velbusaio.channels import (
     Temperature as TemperatureChannelType,
 )
 from velbusaio.command_registry import commandRegistry
-from velbusaio.config import decode_name, encode_name
+from velbusaio.config import ConfigParameter, decode_name, encode_name
 from velbusaio.const import PRIORITY_LOW, SCAN_MODULEINFO_TIMEOUT_INITIAL
 from velbusaio.helpers import h2, handle_match, keys_exists
 from velbusaio.memory import MemoryBackend, join_address
@@ -1008,6 +1008,33 @@ class Module:
     def get_properties(self) -> dict[str, Property]:
         """List all properties for this module."""
         return self._properties
+
+    def get_config_parameters(self) -> list[ConfigParameter]:
+        """List every configuration parameter this module exposes.
+
+        Channels and properties each answer for themselves, so callers do not
+        have to know which of the two a setting lives on. A parameter carries
+        the channel it belongs to; a module-level property reports channel 0.
+        """
+        params: list[ConfigParameter] = []
+        for item in (*self._channels.values(), *self._properties.values()):
+            if hasattr(item, "get_config_parameters"):
+                params.extend(item.get_config_parameters())
+        return params
+
+    def find_config_parameter(
+        self, key: str, channel: int | None = None
+    ) -> ConfigParameter | None:
+        """Return one configuration parameter by key, or None.
+
+        The same key can appear on several channels, so a channel narrows it
+        down; without one the first match wins, which is what module level
+        parameters need.
+        """
+        for param in self.get_config_parameters():
+            if param.key == key and (channel is None or param.channel == channel):
+                return param
+        return None
 
     def get_memory(self) -> MemoryBackend | None:
         """Return the module memory backend, if initialized."""

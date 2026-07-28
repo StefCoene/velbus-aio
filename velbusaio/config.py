@@ -29,6 +29,11 @@ class ConfigParameter:
     entity_category: str = "config"
     # False = config-panel only; do not expose as a Home Assistant entity.
     entity: bool = True
+    # True when writing this changes module eeprom, which is destructive if the
+    # addresses are wrong. False when the setter only puts a message on the bus,
+    # which a module either accepts or ignores. Callers use this to decide how
+    # much ceremony a write needs; the safe default is to assume eeprom.
+    writes_memory: bool = True
     metadata: dict[str, Any] = field(default_factory=dict)
 
     async def get_value(self) -> Any:
@@ -72,6 +77,7 @@ class ConfigParameter:
             "channel": self.channel,
             "entity_category": self.entity_category,
             "entity": self.entity,
+            "writes_memory": self.writes_memory,
             "metadata": self.metadata,
         }
 
