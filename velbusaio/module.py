@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 from velbusaio import channels as channels_module, properties as properties_module
 from velbusaio.actions import ActionSlot, ActionTable, build_action_tables
+from velbusaio.autosend import AUTOSEND_HINT, AUTOSEND_INTERVAL_MAX, AUTOSEND_NO_CHANGE
 from velbusaio.channels import (
     Button,
     ButtonCounter,
@@ -30,7 +31,7 @@ from velbusaio.channels import (
 from velbusaio.command_registry import commandRegistry
 from velbusaio.config import ConfigParameter, decode_name, encode_name
 from velbusaio.const import PRIORITY_LOW, SCAN_MODULEINFO_TIMEOUT_INITIAL
-from velbusaio.exceptions import VelbusException
+from velbusaio.exceptions import VelbusConfigError, VelbusException
 from velbusaio.helpers import h2, handle_match, keys_exists
 from velbusaio.memory import MemoryBackend, join_address
 from velbusaio.message import Message
@@ -1029,7 +1030,7 @@ class Module:
         """
         if self._memory is None:
             return
-        for kind in ("temperature", "light"):
+        for kind in ("temperature", "light", "counter"):
             address = self.get_autosend_address(kind)
             if address is None:
                 continue
@@ -1078,11 +1079,55 @@ class Module:
         have to know which of the two a setting lives on. A parameter carries
         the channel it belongs to; a module-level property reports channel 0.
         """
-        params: list[ConfigParameter] = []
+        params: list[ConfigParameter] = list(self._module_config_parameters())
         for item in (*self._channels.values(), *self._properties.values()):
             if hasattr(item, "get_config_parameters"):
                 params.extend(item.get_config_parameters())
         return params
+
+    def _module_config_parameters(self) -> list[ConfigParameter]:
+        """Return settings that belong to the module rather than one channel."""
+        if self.get_autosend_address("counter") is None:
+            return []
+        return [
+            ConfigParameter(
+                key="counter_autosend_interval",
+                label="Counter autosend interval",
+                kind="number",
+                getter=self._get_counter_autosend,
+                setter=self._set_counter_autosend,
+                min_value=float(AUTOSEND_NO_CHANGE),
+                max_value=float(AUTOSEND_INTERVAL_MAX),
+                # The protocol states this interval is common to all counter
+                # channels, so it is a module setting, not a channel one.
+                channel=0,
+                writes_memory=False,
+                metadata={"unit": "s", "hint": AUTOSEND_HINT},
+            )
+        ]
+
+    async def _get_counter_autosend(self) -> int | None:
+        address = self.get_autosend_address("counter")
+        if address is None or self._memory is None:
+            return None
+        return self._memory.get_cached(address)
+
+    async def _set_counter_autosend(self, value: float) -> None:
+        """Send command BD with the interval, then read back what stuck."""
+        cls = commandRegistry.get_command(0xBD, self._type)
+        if cls is None:
+            raise VelbusConfigError(
+                f"Module type {h2(self._type)} does not support setting the "
+                "counter autosend interval"
+            )
+        msg = cls(self._address, int(value))
+        msg.channels = [
+            num
+            for num, chan in self._channels.items()
+            if isinstance(chan, ButtonCounter)
+        ]
+        await self._writer(msg)
+        await self.refresh_autosend_intervals(use_cache=False)
 
     def find_config_parameter(
         self, key: str, channel: int | None = None

@@ -164,6 +164,9 @@
         }
       }
     },
+    "AutosendInterval": {
+      "counter": "00F8"
+    },
     "ChannelEnable": {
       "channels": {
         "01": "0080",
