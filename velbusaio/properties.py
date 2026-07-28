@@ -191,7 +191,7 @@ class LightValue(Property):
         return [
             ConfigParameter(
                 key="light_autosend_interval",
-                label="Light value autosend interval (s)",
+                label="Light value autosend interval",
                 kind="number",
                 getter=self._get_interval,
                 setter=self._set_interval,
