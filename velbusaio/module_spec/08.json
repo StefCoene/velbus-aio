@@ -56,22 +56,22 @@
       "channels": {
         "01": {
           "bank": "0000",
-          "noc_address": "00EA"
+          "noc_address": "00DE"
         },
         "02": {
           "bank": "0100",
-          "noc_address": "01EA"
+          "noc_address": "01DE"
         },
         "03": {
           "bank": "0200",
-          "noc_address": "02EA"
+          "noc_address": "02DE"
         },
         "04": {
           "bank": "0300",
-          "noc_address": "03EA"
+          "noc_address": "03DE"
         }
       },
-      "slot_count": 39,
+      "slot_count": 37,
       "slot_size": 6
     },
     "Channels": {
