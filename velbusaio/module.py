@@ -498,8 +498,12 @@ class Module:
         return ""
 
     def get_sw_version(self) -> str:
-        """Get the module software version."""
-        return f"{self.build_year}.{self.build_week}"
+        """Get the module software version.
+
+        This is the build number VelbusLink shows, "YYWW", so that what Home
+        Assistant reports can be compared to it directly.
+        """
+        return self.get_build() or ""
 
     def calc_channel_offset(self, address: int) -> int:
         """Calculate channel offset based on address."""
