@@ -7,6 +7,7 @@ import importlib.resources
 import json
 from typing import TYPE_CHECKING, Any
 
+from velbusaio.action_time import iter_action_times
 from velbusaio.actions import iter_action_options
 
 if TYPE_CHECKING:
@@ -130,6 +131,9 @@ def _action_table_section(spec: dict[str, Any]) -> dict[str, Any] | None:
         "layout": action_table.get("layout", "per_channel"),
         "channels": channels,
         "actions": list(iter_action_options(catalog_id)),
+        # A module holds a fixed set of durations, so the panel offers exactly
+        # those instead of a free number that would silently round.
+        "time_options": list(iter_action_times()),
     }
 
 
