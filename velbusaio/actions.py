@@ -449,6 +449,9 @@ class _SharedSlotStore:
         self.slots = slots
         return slots
 
+    def forget(self) -> None:
+        self.slots = None
+
     def slot_address(self, slot: int) -> int:
         if slot < 0 or slot >= self.slot_count:
             raise VelbusConfigError(
@@ -520,6 +523,18 @@ class ActionTable:
         if self._shared is not None:
             return self._shared.slots is not None
         return self._slots is not None
+
+    def forget(self) -> None:
+        """Drop the parsed slots so the next load() reads them again.
+
+        Only the parsing is dropped; the memory bytes behind it are the caller's
+        to invalidate, which is what makes this usable both for "re-read from
+        the bus" and for "re-parse what we just restored from disk".
+        """
+        self._slots = None
+        self._normal_closed = None
+        if self._shared is not None:
+            self._shared.forget()
 
     def _slot_address(self, slot: int) -> int:
         if self._shared is not None:
