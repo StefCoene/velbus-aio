@@ -42,16 +42,25 @@ CACHE_VERSION: Final = 1
 CACHE_SUFFIX: Final = "-actions.json"
 
 type ProgressCallback = Callable[["ScanProgress"], None]
+type BytesCallback = Callable[[int, int], None]
 
 
 @dataclass(slots=True)
 class ScanProgress:
-    """How far a scan has come, reported before each module is read."""
+    """How far a scan has come, reported as it reads.
+
+    Modules are the coarse unit and bytes the fine one. Reading a single module
+    is one module either way, so the byte counters are what says anything is
+    happening -- and they are the honest unit anyway, because a shared table is
+    read once for every channel that points at it.
+    """
 
     done: int
     total: int
     address: int
     name: str
+    bytes_done: int = 0
+    bytes_total: int = 0
 
 
 @dataclass(slots=True)
@@ -204,7 +213,11 @@ def import_module_actions(module: Module, data: dict[str, Any]) -> float | None:
 
 
 async def scan_module_actions(
-    module: Module, *, force: bool = False, include_empty: bool = False
+    module: Module,
+    *,
+    force: bool = False,
+    include_empty: bool = False,
+    progress: BytesCallback | None = None,
 ) -> ModuleActions:
     """Read every action table of one module.
 
@@ -225,6 +238,37 @@ async def scan_module_actions(
     # are already known -- which they are after load_action_cache(), even
     # though nothing has parsed them into slots yet.
     result.from_cache = not force and has_cached_actions(module)
+
+    ranges = action_ranges(module)
+    memory = module.get_memory()
+    bytes_total = sum(length for _start, length in ranges)
+
+    def report() -> None:
+        if progress is None:
+            return
+        done = 0
+        if memory is not None and not force:
+            done = sum(
+                length
+                for start, length in ranges
+                if memory.get_cached_range(start, length) is not None
+            )
+        progress(done, bytes_total)
+
+    # A forced read starts over, so the bytes it already holds say nothing
+    # about how far it has come; counting them would start the bar full.
+    read_ranges: list[tuple[int, int]] = []
+
+    def report_forced() -> None:
+        if progress is None:
+            return
+        progress(sum(length for _start, length in read_ranges), bytes_total)
+
+    if force:
+        report_forced()
+    else:
+        report()
+
     for channel, table in sorted(tables.items()):
         try:
             slots = await table.get_actions(refresh=force, include_empty=include_empty)
@@ -238,6 +282,22 @@ async def scan_module_actions(
             )
             break
         result.channels[channel] = slots
+        if force:
+            table_range = (table.bank, table.slot_count * table.slot_size)
+            if table_range not in read_ranges:
+                read_ranges.append(table_range)
+            if (
+                table.noc_address is not None
+                and (
+                    table.noc_address,
+                    1,
+                )
+                not in read_ranges
+            ):
+                read_ranges.append((table.noc_address, 1))
+            report_forced()
+        else:
+            report()
     return result
 
 
@@ -267,28 +327,42 @@ async def scan_actions(
     scan = ActionScan()
     started = time.monotonic()
     for index, module in enumerate(modules):
-        if progress is not None:
+
+        def report(
+            bytes_done: int,
+            bytes_total: int,
+            index: int = index,
+            module: Module = module,
+        ) -> None:
+            if progress is None:
+                return
             progress(
                 ScanProgress(
                     done=index,
                     total=len(modules),
                     address=module.get_address(),
                     name=module.get_name(),
+                    bytes_done=bytes_done,
+                    bytes_total=bytes_total,
                 )
             )
+
         scan.modules[module.get_address()] = await scan_module_actions(
-            module, force=force, include_empty=include_empty
+            module, force=force, include_empty=include_empty, progress=report
         )
     scan.duration = time.monotonic() - started
 
     if progress is not None and modules:
         last = modules[-1]
+        read = sum(length for _start, length in action_ranges(last))
         progress(
             ScanProgress(
                 done=len(modules),
                 total=len(modules),
                 address=last.get_address(),
                 name=last.get_name(),
+                bytes_done=read,
+                bytes_total=read,
             )
         )
     return scan
