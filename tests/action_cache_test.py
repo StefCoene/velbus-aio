@@ -213,9 +213,30 @@ class TestScan:
         )
         seen = []
         scan = await scan_actions(controller, progress=seen.append)
-        assert [(step.done, step.total) for step in seen] == [(0, 2), (1, 2), (2, 2)]
+
+        # Both units: modules for the whole run, bytes for the module in hand.
+        # Reading one module is one module either way, so without the bytes
+        # there would be nothing to show while it works.
+        assert (seen[0].done, seen[0].total) == (0, 2)
+        assert (seen[-1].done, seen[-1].total) == (2, 2)
+        assert seen[0].bytes_done == 0
+        first = [step for step in seen if step.address == 0x11]
+        assert first[-1].bytes_done == first[-1].bytes_total > 0
+        assert first == sorted(first, key=lambda step: step.bytes_done)
         assert set(scan.modules) == {0x11, 0x12}
         assert scan.action_count == 4
+
+    @pytest.mark.asyncio
+    async def test_a_forced_scan_counts_from_zero(self, tmp_path):
+        """What it already holds says nothing about a read that starts over."""
+        module = _programmed_module()
+        await scan_module_actions(module)
+        controller = FakeController(tmp_path, module)
+
+        seen = []
+        await scan_actions(controller, force=True, progress=seen.append)
+        assert seen[0].bytes_done == 0
+        assert seen[-1].bytes_done == seen[-1].bytes_total > 0
 
     @pytest.mark.asyncio
     async def test_one_dead_module_does_not_stop_the_scan(self, tmp_path):
